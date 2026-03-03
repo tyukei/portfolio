@@ -1,0 +1,1 @@
+import{t as e}from"./q-Db9bF7-q.js";import{S as t,p as n}from"./q-iIiPrPDe.js";var r=new Date().getFullYear(),i=Array.from({length:r-2020+1},(e,t)=>r-t);const a=t(n(()=>e(()=>import(`./q-J7pbTM5x.js`),[]),`s_PpA1YuWiP2A`));export{a as n,i as r,r as t};

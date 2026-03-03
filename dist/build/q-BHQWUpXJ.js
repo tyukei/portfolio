@@ -1,0 +1,1 @@
+import{M as e,P as t}from"./q-iIiPrPDe.js";const n=()=>{let[t,n]=e();n.value>=4||(t.value=!0,n.value++,n.value===4&&setTimeout(()=>{t.value&&(t.value=!1,n.value=0,requestAnimationFrame(()=>requestAnimationFrame(()=>{t.value=!0})))},650))};export{t as _hW,n as s_kHZNlu0wITs};

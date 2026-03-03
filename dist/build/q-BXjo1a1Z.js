@@ -1,0 +1,1 @@
+import{P as e}from"./q-iIiPrPDe.js";import{O as t}from"./q-Bf3o1pni.js";const n=(e,n)=>{t(new URL(n.href).pathname,1)};export{e as _hW,n as s_3cNFwPcj7zI};

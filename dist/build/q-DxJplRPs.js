@@ -1,0 +1,1 @@
+import{M as e,P as t}from"./q-iIiPrPDe.js";const n=({track:t})=>{let[n,r,i,a]=e();t(()=>a.url.pathname);let o=i.onQVisible$;if(o){let e=new CustomEvent(`qvisible`);Array.isArray(o)?o.flat(10).forEach(t=>t?.(e,n.value)):o?.(e,n.value)}n.value&&r?.(void 0,n.value)};export{t as _hW,n as s_APnFDO0k0Hs};

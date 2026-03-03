@@ -1,0 +1,50 @@
+{
+  "name": "portfolio",
+  "description": "Keita Nakata's portfolio - Activity-First design",
+  "engines": {
+    "node": "^18.17.0 || ^20.3.0 || >=21.0.0"
+  },
+  "engines-annotation": "Mostly required by sharp which needs a Node-API v9 compatible runtime",
+  "private": true,
+  "trustedDependencies": [
+    "sharp"
+  ],
+  "trustedDependencies-annotation": "Needed for bun to allow running install scripts",
+  "type": "module",
+  "scripts": {
+    "build": "qwik build",
+    "build.client": "vite build",
+    "build.preview": "vite build --ssr src/entry.preview.tsx",
+    "build.server": "vite build -c adapters/static/vite.config.ts",
+    "build.types": "tsc --incremental --noEmit",
+    "deploy": "echo 'Run npm run build then upload dist/* and api/* to Lolipop'",
+    "dev": "vite --mode ssr",
+    "dev.debug": "node --inspect-brk ./node_modules/vite/bin/vite.js --mode ssr --force",
+    "fmt": "biome check --write",
+    "preview": "qwik build preview && vite preview --open",
+    "start": "vite --open --mode ssr",
+    "qwik": "qwik"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.2.4",
+    "@builder.io/qwik": "^1.16.0",
+    "@builder.io/qwik-city": "^1.16.0",
+    "@qwik-ui/headless": "^0.6.4",
+    "@types/node": "^20.19.0",
+    "esbuild": "^0.27.0",
+    "@unocss/core": "^65.4.2",
+    "@unocss/preset-icons": "^65.4.2",
+    "@unocss/preset-uno": "^65.4.2",
+    "@unocss/reset": "^65.4.2",
+    "@unocss/vite": "^66.5.1",
+    "ignore": "^7.0.3",
+    "typescript": "5.4.5",
+    "undici": "*",
+    "vite": "npm:rolldown-vite",
+    "vite-tsconfig-paths": "^4.2.1"
+  },
+  "dependencies": {
+    "@iconify-json/simple-icons": "^1.2.20",
+    "@iconify-json/tabler": "^1.2.14"
+  }
+}

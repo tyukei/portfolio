@@ -1,0 +1,1 @@
+import{M as e}from"./q-iIiPrPDe.js";import{i as t}from"./q-C18XAmCV.js";const n=()=>{let[n]=e();return n.data?t(n.data.contributions):0};export{n as s_WptfVxE9Udc};

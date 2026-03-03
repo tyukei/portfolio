@@ -1,0 +1,1 @@
+import{t as e}from"./q-Db9bF7-q.js";var t=()=>e(()=>import(`./q-C_JG59Gb.js`),[]);const n=[[`/`,[t,()=>e(()=>import(`./q-CnBozDTC.js`),[])]],[`now/`,[t,()=>e(()=>import(`./q-B25au4sD.js`),[])]]],r=[],i=!0,a=!0;export{i,r as n,n as r,a as t};

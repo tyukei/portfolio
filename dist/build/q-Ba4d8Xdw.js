@@ -1,0 +1,1 @@
+import{M as e,P as t}from"./q-iIiPrPDe.js";const n=async(t,n)=>{let[r,i,a,o]=e();t.defaultPrevented&&(n.hasAttribute(`q:nbs`)?await r(location.href,{type:`popstate`}):n.href&&(n.setAttribute(`aria-pressed`,`true`),await r(n.href,{forceReload:i,replaceState:a,scroll:o}),n.removeAttribute(`aria-pressed`)))};export{t as _hW,n as s_hIiwEb9KLgM};

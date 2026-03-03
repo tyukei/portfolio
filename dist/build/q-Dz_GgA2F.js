@@ -1,0 +1,1 @@
+import{c as e,j as t,t as n,y as r}from"./q-iIiPrPDe.js";const i=i=>e(`li`,null,{class:`flex items-start gap-3`},[e(`div`,null,{class:r(e=>`${e.icon} w-5 h-5 mt-0.5 flex-shrink-0`,[i]),style:`color:var(--accent)`},null,3,null),e(`span`,null,{style:`color:var(--text-1)`},n(t,null,3,`CZ_0`),1,null)],1,`CZ_1`);export{i as s_3HvMLoST5io};
