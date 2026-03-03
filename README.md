@@ -61,6 +61,19 @@ npm run build
 
 本プロジェクトは GitHub Actions によるCI/CDに対応しており、`main` ブランチにプッシュされると自動的に Lolipop サーバーの指定ディレクトリへデプロイされます。
 
+### 6. GitHub Actions Secrets Setup (自動デプロイ設定用)
+
+自動デプロイを有効にするには、GitHub側にFTPパスワードとAPIのトークンを登録する必要があります。
+プロジェクトルートに含まれている専用スクリプトを使うと簡単に登録できます。
+
+```bash
+# 実行権限を付与してセットアップ用スクリプトを実行
+chmod +x setup_secrets.sh
+./setup_secrets.sh
+```
+
+実行後、画面の指示に従ってFTPサーバー名、アカウント、パスワードを入力すると、自動でリポジトリにSecretが設定されます。（※実行には事前に [GitHub CLI](https://cli.github.com/) がインストールおよびログインされている必要があります）
+
 ## 📄 License
 
 MIT License
