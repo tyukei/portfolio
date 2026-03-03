@@ -1,13 +1,13 @@
-const staticPaths = new Set(["/","/favicon.ico","/now/","/q-manifest.json","/service-worker.js","/sitemap.xml"]);
+const staticPaths = new Set(["/portfolio/","/portfolio/CNAME","/portfolio/favicon.ico","/portfolio/now/","/portfolio/q-manifest.json","/portfolio/service-worker.js","/portfolio/sitemap.xml"]);
 function isStaticPath(method, url) {
   if (method.toUpperCase() !== 'GET') {
     return false;
   }
   const p = url.pathname;
-  if (p.startsWith("/build/")) {
+  if (p.startsWith("/portfolio/build/")) {
     return true;
   }
-  if (p.startsWith("/assets/")) {
+  if (p.startsWith("/portfolio/assets/")) {
     return true;
   }
   if (staticPaths.has(p)) {

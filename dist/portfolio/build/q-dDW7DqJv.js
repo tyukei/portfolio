@@ -1,0 +1,1 @@
+import{M as e}from"./q-CrZFzTXD.js";const t=()=>{let[t]=e();t.value=!t.value,t.value?(document.documentElement.classList.remove(`light`),localStorage.setItem(`theme`,`dark`)):(document.documentElement.classList.add(`light`),localStorage.setItem(`theme`,`light`))};export{t as s_XbS4TTKkplM};

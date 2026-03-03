@@ -1,0 +1,1 @@
+import{M as e,P as t}from"./q-CrZFzTXD.js";const n=t=>{let[n]=e();if(!n.submitted)return n.submit(t)};export{t as _hW,n as s_voP4kl9c7qQ};

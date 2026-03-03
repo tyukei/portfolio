@@ -1,0 +1,1 @@
+import{t as e}from"./q-D_1LUVVv.js";const t=()=>e(()=>import(`./q-BlKYPMUf.js`),[]);export{t as ServiceworkerServiceWorker};

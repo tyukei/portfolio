@@ -1,5 +1,5 @@
 import { component$ } from '@builder.io/qwik'
-import type { DocumentHead } from '@builder.io/qwik-city'
+import { Link, type DocumentHead } from '@builder.io/qwik-city'
 import { NOW_DATA, NOW_UPDATED } from '~/data/now'
 
 export default component$(() => {
@@ -62,14 +62,14 @@ export default component$(() => {
 
       {/* Back link */}
       <div class="mt-12 pt-6" style="border-top:1px solid var(--border)">
-        <a
+        <Link
           href="/"
           class="flex items-center gap-2 text-sm transition-opacity hover:opacity-70"
           style="color:var(--accent)"
         >
           <div class="i-tabler:arrow-left w-4 h-4" />
           トップに戻る
-        </a>
+        </Link>
       </div>
     </div>
   )

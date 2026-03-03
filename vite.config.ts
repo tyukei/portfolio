@@ -13,8 +13,29 @@ const { dependencies = {}, devDependencies = {} } = pkg as unknown as {
 }
 errorOnDuplicatesPkgDeps(devDependencies, dependencies)
 
+function normalizeBasePath(value: string | undefined): string {
+  if (!value) return '/'
+  const withLeading = value.startsWith('/') ? value : `/${value}`
+  return withLeading.endsWith('/') ? withLeading : `${withLeading}/`
+}
+
+function detectPagesBasePath(): string {
+  if (process.env.BASE_PATH) {
+    return normalizeBasePath(process.env.BASE_PATH)
+  }
+
+  if (process.env.GITHUB_ACTIONS === 'true') {
+    const repo = process.env.GITHUB_REPOSITORY?.split('/')[1]
+    if (repo) return normalizeBasePath(repo)
+  }
+
+  return '/'
+}
+
 export default defineConfig((): UserConfig => {
+  const basePath = detectPagesBasePath()
   return {
+    base: basePath,
     plugins: [uno(), qwikCity(), qwikVite(), tsconfigPaths()],
     optimizeDeps: {
       exclude: [],

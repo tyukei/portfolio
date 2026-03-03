@@ -1,0 +1,1 @@
+import{M as e,P as t}from"./q-CrZFzTXD.js";const n=()=>{let[t,n]=e();if(n.value<=0){t.value=!1,n.value=4,requestAnimationFrame(()=>requestAnimationFrame(()=>{t.value=!0,n.value=3}));return}t.value=!0,n.value--};export{t as _hW,n as s_jKYwWuK9qMQ};

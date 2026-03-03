@@ -1,0 +1,1 @@
+import{t as e}from"./q-D_1LUVVv.js";import{S as t,p as n}from"./q-CrZFzTXD.js";var r=t(n(()=>e(()=>import(`./q-C6Z5Dh-2.js`),[]),`s_PmjOvIUc0xs`));const i={title:`/now — Keita Nakata`,meta:[{name:`description`,content:`Keita Nakata が今取り組んでいること、読んでいるもの、最近ハマっていることを紹介するページ。`}]};export{r as default,i as head};

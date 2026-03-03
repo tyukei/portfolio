@@ -1,0 +1,1 @@
+import{M as e,P as t}from"./q-CrZFzTXD.js";const n=({track:t})=>{let[n,r]=e();if(t(()=>r.target),r.target===0)return;let i=Date.now(),a=r.target,o=()=>{let e=Date.now()-i,t=Math.min(e/800,1),r=1-(1-t)**4;n.value=Math.round(0+(a-0)*r),t<1&&requestAnimationFrame(o)};requestAnimationFrame(o)};export{t as _hW,n as s_2rNKFCYxMU8};
