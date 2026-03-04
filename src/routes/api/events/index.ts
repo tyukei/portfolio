@@ -1,7 +1,6 @@
 import type { RequestHandler } from '@builder.io/qwik-city'
 import {
   clampInt,
-  fetchJson,
   readJsonCache,
   writeJsonCache,
 } from '~/utils/api-utils'
@@ -32,39 +31,52 @@ export const onGet: RequestHandler = async ({ json, query }) => {
   const cacheKey = `events_${todayKey()}.json`
 
   const cached = await readJsonCache<ConnpassEvent[]>(cacheKey)
-  if (cached) {
+  if (cached && cached.length > 0) {
     json(200, { events: cached.slice(0, count) })
     return
   }
 
-  const apiKey = process.env.CONNPASS_API_KEY ?? ''
-  const data = await fetchJson<ConnpassV2Response>(
-    `https://connpass.com/api/v2/users/${NICKNAME}/presenter_events/?count=100&order=2`,
-    {
-      headers: {
-        'User-Agent': 'portfolio-site/1.0',
-        ...(apiKey ? { 'X-API-Key': apiKey } : {}),
-      },
-    },
-  )
-
-  const map = new Map<number, ConnpassEvent>()
-  for (const ev of data?.events ?? []) {
-    map.set(ev.id, {
-      event_id: ev.id,
-      title: ev.title,
-      event_url: ev.url,
-      started_at: ev.started_at,
-      is_owner: (ev.owner_nickname ?? '').toLowerCase() === NICKNAME.toLowerCase(),
-      is_presenter: true,
-    })
+  const events = await fetchConnpassEvents()
+  if (events.length > 0) {
+    await writeJsonCache(cacheKey, events)
   }
-
-  const events = [...map.values()].sort((a, b) => b.started_at.localeCompare(a.started_at))
-  await writeJsonCache(cacheKey, events)
   json(200, { events: events.slice(0, count) })
 }
 
 function todayKey(): string {
   return new Date().toISOString().slice(0, 10)
+}
+
+async function fetchConnpassEvents(): Promise<ConnpassEvent[]> {
+  const apiKey = process.env.CONNPASS_API_KEY ?? ''
+  if (!apiKey) return []
+
+  try {
+    const res = await fetch(
+      `https://connpass.com/api/v2/users/${NICKNAME}/presenter_events/?count=100&order=2`,
+      {
+        headers: {
+          Accept: 'application/json',
+          'User-Agent': 'portfolio-site/1.0',
+          'X-API-Key': apiKey,
+        },
+      },
+    )
+    if (!res.ok) return []
+    const data = (await res.json()) as ConnpassV2Response
+    const map = new Map<number, ConnpassEvent>()
+    for (const ev of data.events ?? []) {
+      map.set(ev.id, {
+        event_id: ev.id,
+        title: ev.title,
+        event_url: ev.url,
+        started_at: ev.started_at,
+        is_owner: (ev.owner_nickname ?? '').toLowerCase() === NICKNAME.toLowerCase(),
+        is_presenter: true,
+      })
+    }
+    return [...map.values()].sort((a, b) => b.started_at.localeCompare(a.started_at))
+  } catch {
+    return []
+  }
 }
