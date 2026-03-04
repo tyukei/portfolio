@@ -308,7 +308,7 @@ async function fetchGitHubMergedByDate(year) {
   for (const username of GITHUB_USERS) {
     const token = resolveGithubTokenForUser(username)
     if (!token) continue
-    const one = await fetchGitHubUserByDate(username, year, token)
+    const one = await fetchGitHubContribByDate(username, year, token)
     for (const [date, count] of Object.entries(one)) {
       merged[date] = (merged[date] ?? 0) + count
     }
@@ -358,15 +358,74 @@ async function fetchGitHubUserByDate(username, year, token) {
   })
 
   const out = {}
-  const weeks = data?.data?.user?.contributionsCollection?.contributionCalendar?.weeks ?? []
-  for (const week of weeks) {
-    for (const day of week?.contributionDays ?? []) {
-      if ((day?.contributionCount ?? 0) > 0) {
-        out[day.date] = day.contributionCount
-      }
+  const days =
+    data?.data?.user?.contributionsCollection?.contributionCalendar?.weeks?.flatMap(
+      (w) => w?.contributionDays ?? [],
+    ) ?? []
+  for (const day of days) {
+    if ((day?.contributionCount ?? 0) > 0) {
+      out[day.date] = day.contributionCount
     }
   }
   return out
+}
+
+async function fetchGitHubViewerByDate(year, token) {
+  const from = `${year}-01-01T00:00:00Z`
+  const to = `${year}-12-31T23:59:59Z`
+  const gql = `
+    query($from: DateTime!, $to: DateTime!) {
+      viewer {
+        login
+        contributionsCollection(from: $from, to: $to) {
+          contributionCalendar {
+            weeks {
+              contributionDays {
+                date
+                contributionCount
+              }
+            }
+          }
+        }
+      }
+    }
+  `
+
+  const data = await fetchJson('https://api.github.com/graphql', {
+    method: 'POST',
+    headers: {
+      Authorization: `bearer ${token}`,
+      'Content-Type': 'application/json',
+      'User-Agent': 'portfolio-site/1.0',
+    },
+    body: JSON.stringify({
+      query: gql,
+      variables: { from, to },
+    }),
+  })
+
+  const out = {}
+  const days =
+    data?.data?.viewer?.contributionsCollection?.contributionCalendar?.weeks?.flatMap(
+      (w) => w?.contributionDays ?? [],
+    ) ?? []
+  for (const day of days) {
+    if ((day?.contributionCount ?? 0) > 0) {
+      out[day.date] = day.contributionCount
+    }
+  }
+  return {
+    login: data?.data?.viewer?.login ?? '',
+    contributions: out,
+  }
+}
+
+async function fetchGitHubContribByDate(username, year, token) {
+  const viewer = await fetchGitHubViewerByDate(year, token)
+  if (viewer.login && viewer.login.toLowerCase() === username.toLowerCase()) {
+    return viewer.contributions
+  }
+  return fetchGitHubUserByDate(username, year, token)
 }
 
 function mergeHeatmapByDate({

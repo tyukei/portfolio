@@ -30,6 +30,19 @@ interface ContributionData {
 
 interface GitHubGraphQLResponse {
   data?: {
+    viewer?: {
+      login?: string
+      contributionsCollection?: {
+        contributionCalendar?: {
+          weeks?: Array<{
+            contributionDays?: Array<{
+              date: string
+              contributionCount: number
+            }>
+          }>
+        }
+      }
+    }
     user?: {
       contributionsCollection?: {
         contributionCalendar?: {
@@ -140,12 +153,24 @@ async function fetchGitHubMerged(
   if (!token) return {}
   const merged: Record<string, number> = {}
   for (const user of users) {
-    const one = await fetchGitHubUserByDate(user, year, token)
+    const one = await fetchGitHubContribByDate(user, year, token)
     for (const [date, count] of Object.entries(one)) {
       merged[date] = (merged[date] ?? 0) + count
     }
   }
   return merged
+}
+
+async function fetchGitHubContribByDate(
+  username: string,
+  year: number,
+  token: string,
+): Promise<Record<string, number>> {
+  const viewer = await fetchGitHubViewerByDate(year, token)
+  if (viewer.login && viewer.login.toLowerCase() === username.toLowerCase()) {
+    return viewer.contributions
+  }
+  return fetchGitHubUserByDate(username, year, token)
 }
 
 async function fetchGitHubUserByDate(
@@ -189,18 +214,75 @@ async function fetchGitHubUserByDate(
   )
 
   const out: Record<string, number> = {}
-  const weeks =
-    data?.data?.user?.contributionsCollection?.contributionCalendar?.weeks ?? []
+  const days =
+    data?.data?.user?.contributionsCollection?.contributionCalendar?.weeks?.flatMap(
+      (w) => w.contributionDays ?? [],
+    ) ?? []
 
-  for (const week of weeks) {
-    for (const day of week.contributionDays ?? []) {
-      if (day.contributionCount > 0) {
-        out[day.date] = day.contributionCount
-      }
+  for (const day of days) {
+    if (day.contributionCount > 0) {
+      out[day.date] = day.contributionCount
     }
   }
 
   return out
+}
+
+async function fetchGitHubViewerByDate(
+  year: number,
+  token: string,
+): Promise<{ login: string; contributions: Record<string, number> }> {
+  const from = `${year}-01-01T00:00:00Z`
+  const to = `${year}-12-31T23:59:59Z`
+  const gql = `
+    query($from: DateTime!, $to: DateTime!) {
+      viewer {
+        login
+        contributionsCollection(from: $from, to: $to) {
+          contributionCalendar {
+            weeks {
+              contributionDays {
+                date
+                contributionCount
+              }
+            }
+          }
+        }
+      }
+    }
+  `
+
+  const data = await fetchJson<GitHubGraphQLResponse>(
+    'https://api.github.com/graphql',
+    {
+      method: 'POST',
+      headers: {
+        'User-Agent': 'portfolio-site/1.0',
+        Authorization: `bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query: gql,
+        variables: { from, to },
+      }),
+    },
+  )
+
+  const out: Record<string, number> = {}
+  const days =
+    data?.data?.viewer?.contributionsCollection?.contributionCalendar?.weeks?.flatMap(
+      (w) => w.contributionDays ?? [],
+    ) ?? []
+  for (const day of days) {
+    if (day.contributionCount > 0) {
+      out[day.date] = day.contributionCount
+    }
+  }
+
+  return {
+    login: data?.data?.viewer?.login ?? '',
+    contributions: out,
+  }
 }
 
 function tokenFingerprint(token: string): string {
