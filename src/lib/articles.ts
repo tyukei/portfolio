@@ -29,7 +29,7 @@ async function safeFetchJson<T>(url: string): Promise<T> {
 }
 
 export async function fetchArticles(count = 6): Promise<ZennArticle[]> {
-  const data = await safeFetchJson<ArticlesResponse>(`/api/articles.php?count=${count}`)
+  const data = await safeFetchJson<ArticlesResponse>(`/api/articles?count=${count}`)
   return data.articles ?? []
 }
 
@@ -47,7 +47,7 @@ export interface EventsResponse {
 }
 
 export async function fetchEvents(count = 8): Promise<ConnpassEvent[]> {
-  const data = await safeFetchJson<EventsResponse>(`/api/events.php?count=${count}`)
+  const data = await safeFetchJson<EventsResponse>(`/api/events?count=${count}`)
   return data.events ?? []
 }
 
@@ -63,6 +63,6 @@ export interface TalksResponse {
 }
 
 export async function fetchTalks(): Promise<Talk[]> {
-  const data = await safeFetchJson<TalksResponse>('/api/talks.php')
+  const data = await safeFetchJson<TalksResponse>('/api/talks')
   return data.talks ?? []
 }

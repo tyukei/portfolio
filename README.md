@@ -30,7 +30,8 @@ npm install
 
 ### 3. Development Server
 
-Qwikのローカルサーバーを起動します。
+Qwikのローカルサーバーを起動します。  
+`/api/*` は Qwik City の TypeScript エンドポイントとして同時に起動するため、PHPサーバーは不要です。
 
 ```bash
 npm run dev

@@ -44,12 +44,6 @@ export default defineConfig((): UserConfig => {
       headers: {
         'Cache-Control': 'public, max-age=0',
       },
-      proxy: {
-        '/api': {
-          target: 'http://localhost:8000',
-          rewrite: (path) => path.replace(/^\/api/, ''),
-        },
-      },
     },
     preview: {
       headers: {

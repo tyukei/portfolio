@@ -19,12 +19,12 @@ export interface ContributionData {
 }
 
 export async function fetchContributions(year?: number): Promise<ContributionData> {
-  const url = year ? `/api/heatmap.php?year=${year}` : '/api/heatmap.php'
+  const url = year ? `/api/heatmap?year=${year}` : '/api/heatmap'
   let res: Response
   try {
     res = await fetch(url)
   } catch {
-    throw new Error('PHP サーバーが必要です (npm run dev では /api/ は動作しません)')
+    throw new Error('API not reachable')
   }
 
   if (!res.ok) {
@@ -33,7 +33,7 @@ export async function fetchContributions(year?: number): Promise<ContributionDat
 
   const ct = res.headers.get('content-type') ?? ''
   if (!ct.includes('json')) {
-    throw new Error('PHP サーバーが必要です (/api/heatmap.php が JSON を返していません)')
+    throw new Error('heatmap API did not return JSON')
   }
 
   try {
