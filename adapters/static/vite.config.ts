@@ -3,6 +3,7 @@ import { extendConfig } from '@builder.io/qwik-city/vite'
 import baseConfig from '../../vite.config'
 
 export default extendConfig(baseConfig, () => {
+  const siteOrigin = process.env.SITE_ORIGIN || 'https://tyukei.github.io/portfolio'
   return {
     build: {
       ssr: true,
@@ -12,7 +13,7 @@ export default extendConfig(baseConfig, () => {
     },
     plugins: [
       staticAdapter({
-        origin: 'https://tyukei.com',
+        origin: siteOrigin,
       }),
     ],
   }
