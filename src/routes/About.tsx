@@ -1,10 +1,4 @@
-import {
-  Slot,
-  component$,
-  useComputed$,
-  useSignal,
-  useVisibleTask$,
-} from '@builder.io/qwik'
+import { Slot, component$ } from '@builder.io/qwik'
 
 const BIRTH = new Date('2000-07-08T20:00:00+09:00').getTime()
 
@@ -23,24 +17,6 @@ const Row = component$<{ icon: string }>((props) => {
 })
 
 export const About = component$(() => {
-  const now = useSignal(Date.now())
-
-  useVisibleTask$(({ cleanup }) => {
-    let running = true
-    const step = () => {
-      now.value = Date.now()
-      if (running) requestAnimationFrame(step)
-    }
-    requestAnimationFrame(step)
-    cleanup(() => {
-      running = false
-    })
-  })
-
-  const age = useComputed$(
-    () => (now.value - BIRTH) / 1000 / 3600 / 24 / 365.24219,
-  )
-
   return (
     <div>
       <h2 class="text-2xl font-bold mb-4" style="color:var(--text-1)">
@@ -49,14 +25,33 @@ export const About = component$(() => {
       <ul class="flex flex-col gap-3">
         <Row icon="i-tabler:user">Keita Nakata / 中田 継太</Row>
         <Row icon="i-tabler:cake">
-          {Math.floor(age.value)}.
-          <span class="text-sm font-mono">
-            {(Math.floor((age.value % 1) * 1_000_000_000) / 1_000_000_000)
-              .toString()
-              .slice(2)
-              .padEnd(9, '0')}
+          <span class="live-age font-mono" data-birth={String(BIRTH)}>
+            ---.---------
           </span>{' '}
-          y/o
+          y/o{' '}
+          <script
+            dangerouslySetInnerHTML={`(() => {
+  const elements = document.querySelectorAll('.live-age');
+  if (!elements.length) return;
+  const YEAR = 1000 * 60 * 60 * 24 * 365.24219;
+  const renderAge = () => {
+    for (const el of elements) {
+      const birth = Number(el.getAttribute('data-birth'));
+      if (!Number.isFinite(birth)) continue;
+      const age = (Date.now() - birth) / YEAR;
+      const intPart = Math.floor(age);
+      const fracPart = (Math.floor((age % 1) * 1_000_000_000) / 1_000_000_000)
+        .toString()
+        .slice(2)
+        .padEnd(9, '0');
+      el.textContent = \`\${intPart}.\${fracPart}\`;
+    }
+  };
+  renderAge();
+  const timer = window.setInterval(renderAge, 250);
+  window.addEventListener('pagehide', () => window.clearInterval(timer), { once: true });
+})();`}
+          />
         </Row>
         <Row icon="i-tabler:map-pin">国頭郡, 沖縄, 日本</Row>
       </ul>
