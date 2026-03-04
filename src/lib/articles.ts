@@ -35,9 +35,24 @@ async function safeFetchJson<T>(url: string): Promise<T> {
   }
 }
 
+async function safeFetchJsonWithFallback<T>(urls: string[]): Promise<T> {
+  let lastErr: Error | null = null
+  for (const url of urls) {
+    try {
+      return await safeFetchJson<T>(url)
+    } catch (e) {
+      lastErr = e instanceof Error ? e : new Error('fetch failed')
+    }
+  }
+  throw lastErr ?? new Error('API not reachable')
+}
+
 export async function fetchArticles(count = 6): Promise<ZennArticle[]> {
-  const data = await safeFetchJson<ArticlesResponse>(apiUrl(`api/articles?count=${count}`))
-  return data.articles ?? []
+  const data = await safeFetchJsonWithFallback<ArticlesResponse>([
+    apiUrl(`api/articles?count=${count}`),
+    apiUrl('static-api/articles.json'),
+  ])
+  return (data.articles ?? []).slice(0, count)
 }
 
 export interface ConnpassEvent {
@@ -54,8 +69,11 @@ export interface EventsResponse {
 }
 
 export async function fetchEvents(count = 8): Promise<ConnpassEvent[]> {
-  const data = await safeFetchJson<EventsResponse>(apiUrl(`api/events?count=${count}`))
-  return data.events ?? []
+  const data = await safeFetchJsonWithFallback<EventsResponse>([
+    apiUrl(`api/events?count=${count}`),
+    apiUrl('static-api/events.json'),
+  ])
+  return (data.events ?? []).slice(0, count)
 }
 
 export interface Talk {
@@ -70,6 +88,9 @@ export interface TalksResponse {
 }
 
 export async function fetchTalks(): Promise<Talk[]> {
-  const data = await safeFetchJson<TalksResponse>(apiUrl('api/talks'))
+  const data = await safeFetchJsonWithFallback<TalksResponse>([
+    apiUrl('api/talks'),
+    apiUrl('static-api/talks.json'),
+  ])
   return data.talks ?? []
 }

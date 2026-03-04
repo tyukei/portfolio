@@ -5,6 +5,7 @@ lib/
 lib-types/
 server/
 tmp/
+public/static-api/
 
 # Dependencies
 node_modules/

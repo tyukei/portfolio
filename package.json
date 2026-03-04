@@ -12,7 +12,7 @@
   "trustedDependencies-annotation": "Needed for bun to allow running install scripts",
   "type": "module",
   "scripts": {
-    "build": "qwik build",
+    "build": "npm run generate:api && qwik build",
     "build.client": "vite build",
     "build.preview": "vite build --ssr src/entry.preview.tsx",
     "build.server": "vite build -c adapters/static/vite.config.ts",
@@ -22,6 +22,7 @@
     "dev.debug": "node --inspect-brk ./node_modules/vite/bin/vite.js --mode ssr --force",
     "fmt": "biome check --write",
     "preview": "qwik build preview && vite preview --open",
+    "generate:api": "node scripts/generate-static-api.mjs",
     "start": "vite --open --mode ssr",
     "qwik": "qwik"
   },

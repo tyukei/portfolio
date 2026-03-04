@@ -25,29 +25,45 @@ function apiUrl(path: string): string {
   return `${normalizedBase}${normalizedPath}`
 }
 
+async function fetchContributionFrom(urls: string[]): Promise<ContributionData> {
+  let lastErr: Error | null = null
+  for (const url of urls) {
+    try {
+      let res: Response
+      try {
+        res = await fetch(url)
+      } catch {
+        throw new Error('API not reachable')
+      }
+
+      if (!res.ok) {
+        throw new Error(`heatmap API error: ${res.status}`)
+      }
+
+      const ct = res.headers.get('content-type') ?? ''
+      if (!ct.includes('json')) {
+        throw new Error('heatmap API did not return JSON')
+      }
+
+      try {
+        return (await res.json()) as ContributionData
+      } catch {
+        throw new Error('API レスポンスの JSON パースに失敗しました')
+      }
+    } catch (e) {
+      lastErr = e instanceof Error ? e : new Error('Failed to load contributions')
+    }
+  }
+  throw lastErr ?? new Error('Failed to load contributions')
+}
+
 export async function fetchContributions(year?: number): Promise<ContributionData> {
-  const url = year ? apiUrl(`api/heatmap?year=${year}`) : apiUrl('api/heatmap')
-  let res: Response
-  try {
-    res = await fetch(url)
-  } catch {
-    throw new Error('API not reachable')
-  }
-
-  if (!res.ok) {
-    throw new Error(`heatmap API error: ${res.status}`)
-  }
-
-  const ct = res.headers.get('content-type') ?? ''
-  if (!ct.includes('json')) {
-    throw new Error('heatmap API did not return JSON')
-  }
-
-  try {
-    return (await res.json()) as ContributionData
-  } catch {
-    throw new Error('API レスポンスの JSON パースに失敗しました')
-  }
+  const y = year ?? new Date().getFullYear()
+  return fetchContributionFrom([
+    apiUrl(`api/heatmap?year=${y}`),
+    apiUrl(`static-api/heatmap/${y}.json`),
+    apiUrl('static-api/heatmap.json'),
+  ])
 }
 
 /**
