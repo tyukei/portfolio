@@ -1,5 +1,5 @@
-import { component$, useSignal, useVisibleTask$ } from '@builder.io/qwik'
-import { type Talk, fetchTalks } from '~/lib/articles'
+import { component$ } from '@builder.io/qwik'
+import type { Talk } from '~/lib/articles'
 
 const TalkCard = component$<{ talk: Talk; last: boolean }>((props) => {
   const { talk } = props
@@ -57,20 +57,8 @@ const TalkCard = component$<{ talk: Talk; last: boolean }>((props) => {
   )
 })
 
-export const Talks = component$(() => {
-  const talks = useSignal<Talk[]>([])
-  const loading = useSignal(true)
-
-  useVisibleTask$(async () => {
-    try {
-      talks.value = (await fetchTalks()).slice(0, 3)
-    } catch {
-      // silently fail
-    } finally {
-      loading.value = false
-    }
-  })
-
+export const Talks = component$<{ talks: Talk[] }>((props) => {
+  const talks = props.talks.slice(0, 3)
   return (
     <div>
       <div class="flex items-center justify-between mb-2">
@@ -89,19 +77,14 @@ export const Talks = component$(() => {
         </a>
       </div>
 
-      {loading.value ? (
-        <div class="flex items-center gap-2 text-sm py-4" style="color:var(--text-2)">
-          <div class="i-tabler:loader-2 w-4 h-4 animate-spin" />
-          Loading...
-        </div>
-      ) : talks.value.length === 0 ? (
+      {talks.length === 0 ? (
         <p class="text-sm" style="color:var(--text-2)">
           スライドが見つかりませんでした。
         </p>
       ) : (
         <div>
-          {talks.value.map((talk, i) => (
-            <TalkCard key={talk.url} talk={talk} last={i === talks.value.length - 1} />
+          {talks.map((talk, i) => (
+            <TalkCard key={talk.url} talk={talk} last={i === talks.length - 1} />
           ))}
         </div>
       )}

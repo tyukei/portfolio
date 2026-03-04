@@ -1,5 +1,5 @@
-import { component$, useSignal, useVisibleTask$ } from '@builder.io/qwik'
-import { type ContributionData, fetchContributions } from '~/lib/contributions'
+import { component$, useSignal } from '@builder.io/qwik'
+import type { ContributionData } from '~/lib/contributions'
 import { ContributionGraph, ContributionLegend } from './ContributionGraph'
 import { StreakBadge } from './StreakBadge'
 
@@ -9,29 +9,11 @@ const YEARS = Array.from(
   (_, i) => CURRENT_YEAR - i,
 )
 
-export const ContributionSection = component$(() => {
+export const ContributionSection = component$<{
+  byYear: Record<number, ContributionData>
+}>((props) => {
   const selectedYear = useSignal(CURRENT_YEAR)
-  const cache = useSignal<Record<number, ContributionData>>({})
-  const loading = useSignal(true)
-
-  const data = cache.value[selectedYear.value] ?? null
-
-  useVisibleTask$(async ({ track }) => {
-    const year = track(() => selectedYear.value)
-    if (cache.value[year]) {
-      loading.value = false
-      return
-    }
-    loading.value = true
-    try {
-      const result = await fetchContributions(year)
-      cache.value = { ...cache.value, [year]: result }
-    } catch {
-      // silently fail
-    } finally {
-      loading.value = false
-    }
-  })
+  const data = props.byYear[selectedYear.value] ?? null
 
   return (
     <div class="flex flex-col gap-3">
@@ -61,7 +43,7 @@ export const ContributionSection = component$(() => {
         class="rounded-xl p-4 md:p-5"
         style="background:var(--bg-surface);border:1px solid var(--border)"
       >
-        <ContributionGraph data={data} loading={loading.value} year={selectedYear.value} />
+        <ContributionGraph data={data} loading={false} year={selectedYear.value} />
       </div>
 
       <div class="flex flex-wrap items-center justify-between gap-3">

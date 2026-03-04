@@ -1,5 +1,5 @@
-import { component$, useSignal, useVisibleTask$ } from '@builder.io/qwik'
-import { type ZennArticle, fetchArticles } from '~/lib/articles'
+import { component$ } from '@builder.io/qwik'
+import type { ZennArticle } from '~/lib/articles'
 
 const ArticleCard = component$<{ article: ZennArticle; last: boolean }>((props) => {
   const { article } = props
@@ -47,20 +47,8 @@ const ArticleCard = component$<{ article: ZennArticle; last: boolean }>((props) 
   )
 })
 
-export const Articles = component$(() => {
-  const articles = useSignal<ZennArticle[]>([])
-  const loading = useSignal(true)
-
-  useVisibleTask$(async () => {
-    try {
-      articles.value = await fetchArticles(3)
-    } catch {
-      // silently fail
-    } finally {
-      loading.value = false
-    }
-  })
-
+export const Articles = component$<{ articles: ZennArticle[] }>((props) => {
+  const articles = props.articles.slice(0, 3)
   return (
     <div>
       <div class="flex items-center justify-between mb-2">
@@ -79,19 +67,14 @@ export const Articles = component$(() => {
         </a>
       </div>
 
-      {loading.value ? (
-        <div class="flex items-center gap-2 text-sm py-4" style="color:var(--text-2)">
-          <div class="i-tabler:loader-2 w-4 h-4 animate-spin" />
-          Loading...
-        </div>
-      ) : articles.value.length === 0 ? (
+      {articles.length === 0 ? (
         <p class="text-sm" style="color:var(--text-2)">
           記事が見つかりませんでした。
         </p>
       ) : (
         <div>
-          {articles.value.map((article, i) => (
-            <ArticleCard key={article.url} article={article} last={i === articles.value.length - 1} />
+          {articles.map((article, i) => (
+            <ArticleCard key={article.url} article={article} last={i === articles.length - 1} />
           ))}
         </div>
       )}

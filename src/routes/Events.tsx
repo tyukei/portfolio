@@ -1,5 +1,5 @@
-import { component$, useSignal, useVisibleTask$ } from '@builder.io/qwik'
-import { type ConnpassEvent, fetchEvents } from '~/lib/articles'
+import { component$ } from '@builder.io/qwik'
+import type { ConnpassEvent } from '~/lib/articles'
 
 const EventCard = component$<{ event: ConnpassEvent; last: boolean }>((props) => {
   const { event } = props
@@ -41,20 +41,8 @@ const EventCard = component$<{ event: ConnpassEvent; last: boolean }>((props) =>
   )
 })
 
-export const Events = component$(() => {
-  const events = useSignal<ConnpassEvent[]>([])
-  const loading = useSignal(true)
-
-  useVisibleTask$(async () => {
-    try {
-      events.value = await fetchEvents(3)
-    } catch {
-      // silently fail
-    } finally {
-      loading.value = false
-    }
-  })
-
+export const Events = component$<{ events: ConnpassEvent[] }>((props) => {
+  const events = props.events.slice(0, 3)
   return (
     <div>
       <div class="flex items-center justify-between mb-2">
@@ -73,19 +61,14 @@ export const Events = component$(() => {
         </a>
       </div>
 
-      {loading.value ? (
-        <div class="flex items-center gap-2 text-sm py-4" style="color:var(--text-2)">
-          <div class="i-tabler:loader-2 w-4 h-4 animate-spin" />
-          Loading...
-        </div>
-      ) : events.value.length === 0 ? (
+      {events.length === 0 ? (
         <p class="text-sm" style="color:var(--text-2)">
           イベントが見つかりませんでした。
         </p>
       ) : (
         <div>
-          {events.value.map((event, i) => (
-            <EventCard key={event.event_id} event={event} last={i === events.value.length - 1} />
+          {events.map((event, i) => (
+            <EventCard key={event.event_id} event={event} last={i === events.length - 1} />
           ))}
         </div>
       )}
