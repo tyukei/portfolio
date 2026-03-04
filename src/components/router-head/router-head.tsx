@@ -7,6 +7,8 @@ import { useDocumentHead, useLocation } from '@builder.io/qwik-city'
 export const RouterHead = component$(() => {
   const head = useDocumentHead()
   const loc = useLocation()
+  const baseUrl = import.meta.env.BASE_URL || '/'
+  const faviconHref = `${baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`}favicon.ico`
 
   return (
     <>
@@ -14,7 +16,7 @@ export const RouterHead = component$(() => {
 
       <link rel="canonical" href={loc.url.href} />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+      <link rel="icon" type="image/x-icon" href={faviconHref} />
       <meta name="theme-color" content="#0a0f0d" />
 
       {head.meta.map((m) => (
