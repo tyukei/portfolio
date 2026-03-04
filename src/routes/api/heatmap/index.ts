@@ -171,11 +171,15 @@ async function fetchGitHubContribByDate(
   year: number,
   token: string,
 ): Promise<Record<string, number>> {
-  const viewer = await fetchGitHubViewerByDate(year, token)
-  if (viewer.login && viewer.login.toLowerCase() === username.toLowerCase()) {
-    return viewer.contributions
+  try {
+    const viewer = await fetchGitHubViewerByDate(year, token)
+    if (viewer.login && viewer.login.toLowerCase() === username.toLowerCase()) {
+      return viewer.contributions
+    }
+    return fetchGitHubUserByDate(username, year, token)
+  } catch {
+    return fetchGitHubPublicByDate(username, year)
   }
-  return fetchGitHubUserByDate(username, year, token)
 }
 
 async function fetchGitHubUserByDate(
@@ -286,6 +290,33 @@ async function fetchGitHubGraphQL(
     throw new Error('GitHub GraphQL errors')
   }
   return data
+}
+
+async function fetchGitHubPublicByDate(
+  username: string,
+  year: number,
+): Promise<Record<string, number>> {
+  const from = `${year}-01-01`
+  const to = `${year}-12-31`
+  const html = await fetchText(
+    `https://github.com/users/${username}/contributions?from=${from}&to=${to}`,
+    {
+      headers: {
+        'User-Agent': 'portfolio-site/1.0',
+      },
+    },
+  )
+  if (!html) return {}
+
+  const out: Record<string, number> = {}
+  const re = /data-date="(\d{4}-\d{2}-\d{2})"[^>]*data-count="(\d+)"/g
+  let m: RegExpExecArray | null = null
+  while ((m = re.exec(html)) !== null) {
+    const date = m[1]
+    const count = Number.parseInt(m[2], 10)
+    if (count > 0) out[date] = count
+  }
+  return out
 }
 
 function tokenFingerprint(token: string): string {

@@ -423,7 +423,7 @@ async function fetchGitHubContribByDate(username, year, tokens) {
       // try next token
     }
   }
-  return {}
+  return fetchGitHubPublicByDate(username, year)
 }
 
 async function fetchGitHubGraphQL(token, query, variables) {
@@ -440,6 +440,26 @@ async function fetchGitHubGraphQL(token, query, variables) {
   const data = await res.json()
   if (data?.errors?.length) throw new Error('GitHub GraphQL errors')
   return data
+}
+
+async function fetchGitHubPublicByDate(username, year) {
+  const from = `${year}-01-01`
+  const to = `${year}-12-31`
+  const html = await fetchText(
+    `https://github.com/users/${username}/contributions?from=${from}&to=${to}`,
+    { headers: { 'User-Agent': 'portfolio-site/1.0' } },
+  )
+  if (!html) return {}
+
+  const out = {}
+  const re = /data-date="(\d{4}-\d{2}-\d{2})"[^>]*data-count="(\d+)"/g
+  let m = null
+  while ((m = re.exec(html)) !== null) {
+    const date = m[1]
+    const count = Number.parseInt(m[2], 10)
+    if (count > 0) out[date] = count
+  }
+  return out
 }
 
 function mergeHeatmapByDate({

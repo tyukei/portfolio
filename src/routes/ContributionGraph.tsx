@@ -39,9 +39,13 @@ export const ContributionGraph = component$<{
   // Calculate month label positions
   const monthLabels: { label: string; col: number }[] = []
   let lastMonth = -1
+  const yearStart = `${props.year}-01-01`
+  const yearEnd = `${props.year}-12-31`
   for (let i = 0; i < cells.length; i++) {
+    const date = cells[i].date
+    if (date < yearStart || date > yearEnd) continue
     const col = Math.floor(i / 7)
-    const month = new Date(cells[i].date).getMonth()
+    const month = new Date(date).getMonth()
     if (month !== lastMonth) {
       monthLabels.push({ label: MONTH_NAMES[month], col })
       lastMonth = month
