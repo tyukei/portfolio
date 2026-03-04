@@ -93,7 +93,16 @@ export const ContributionSection = component$<{
     }
   };
 
-  setYear(initialYear);
+  const applyInitial = () => setYear(initialYear);
+  applyInitial();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', applyInitial, { once: true });
+  } else {
+    window.requestAnimationFrame(applyInitial);
+  }
+  // Qwik resume can re-apply SSR state. Apply once more after qinit.
+  document.addEventListener('qinit', applyInitial, { once: true });
+  window.addEventListener('pageshow', applyInitial, { once: true });
 
   for (const tab of tabs) {
     tab.addEventListener('click', (e) => {
