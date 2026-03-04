@@ -31,10 +31,11 @@ export const About = component$(() => {
           y/o{' '}
           <script
             dangerouslySetInnerHTML={`(() => {
-  const elements = document.querySelectorAll('.live-age');
-  if (!elements.length) return;
+  if (window.__liveAgeTimer) return;
   const YEAR = 1000 * 60 * 60 * 24 * 365.24219;
   const renderAge = () => {
+    const elements = document.querySelectorAll('.live-age');
+    if (!elements.length) return;
     for (const el of elements) {
       const birth = Number(el.getAttribute('data-birth'));
       if (!Number.isFinite(birth)) continue;
@@ -48,8 +49,13 @@ export const About = component$(() => {
     }
   };
   renderAge();
-  const timer = window.setInterval(renderAge, 250);
-  window.addEventListener('pagehide', () => window.clearInterval(timer), { once: true });
+  window.__liveAgeTimer = window.setInterval(renderAge, 250);
+  window.addEventListener('pagehide', () => {
+    if (window.__liveAgeTimer) {
+      window.clearInterval(window.__liveAgeTimer);
+      window.__liveAgeTimer = 0;
+    }
+  }, { once: true });
 })();`}
           />
         </Row>

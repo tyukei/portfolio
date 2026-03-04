@@ -42,15 +42,18 @@ const currentYear = new Date().getFullYear()
 
 for (let year = START_YEAR; year <= currentYear; year++) {
   const githubByDate = await fetchGitHubMergedByDate(year)
-  const heatmap = mergeHeatmapByDate({
+  let heatmap = mergeHeatmapByDate({
     year,
     githubByDate,
     zennByDate,
     connpassByDate,
     speakerDeckByDate,
   })
+  const prevYearPath = join(PUBLIC_API_DIR, 'heatmap', `${year}.json`)
+  const prevHeatmap = await readJson(prevYearPath)
+  heatmap = preserveGithubFromPrevious(heatmap, prevHeatmap)
   await writeJsonPreferNonEmpty(
-    join(PUBLIC_API_DIR, 'heatmap', `${year}.json`),
+    prevYearPath,
     heatmap,
     (v) => Object.keys(v?.contributions ?? {}).length > 0,
   )
@@ -402,4 +405,38 @@ function mergeHeatmapByDate({
   }
 
   return { contributions, summary }
+}
+
+function preserveGithubFromPrevious(nextData, prevData) {
+  const nextGithub = Number(nextData?.summary?.github ?? 0)
+  const prevGithub = Number(prevData?.summary?.github ?? 0)
+  if (nextGithub > 0 || prevGithub <= 0) return nextData
+
+  const merged = {
+    contributions: { ...(nextData?.contributions ?? {}) },
+    summary: { ...(nextData?.summary ?? {}) },
+  }
+
+  for (const [date, prev] of Object.entries(prevData?.contributions ?? {})) {
+    const prevCount = Number(prev?.github ?? 0)
+    if (prevCount <= 0) continue
+
+    const cur = merged.contributions[date] ?? {
+      github: 0,
+      zenn: 0,
+      connpass: 0,
+      speakerdeck: 0,
+      total: 0,
+    }
+
+    const diff = prevCount - Number(cur.github ?? 0)
+    if (diff <= 0) continue
+
+    cur.github = prevCount
+    cur.total = Number(cur.total ?? 0) + diff
+    merged.contributions[date] = cur
+    merged.summary.github = Number(merged.summary.github ?? 0) + diff
+  }
+
+  return merged
 }
