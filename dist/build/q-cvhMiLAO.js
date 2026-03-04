@@ -1,1 +1,0 @@
-import{M as e}from"./q-iIiPrPDe.js";const t=()=>{let[t,n,r,i,a]=e();i.value={name:a.name,level:a.level,color:t,x:n,y:r}};export{t as s_Y9W6AAsvoVQ};

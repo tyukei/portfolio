@@ -1,1 +1,0 @@
-import{M as e,P as t}from"./q-iIiPrPDe.js";const n=({cleanup:t})=>{let[n]=e(),r=!0,i=()=>{n.value=Date.now(),r&&requestAnimationFrame(i)};requestAnimationFrame(i),t(()=>{r=!1})};export{t as _hW,n as s_eI6LlQWLTDI};

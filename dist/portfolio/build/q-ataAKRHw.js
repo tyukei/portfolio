@@ -1,1 +1,0 @@
-import{M as e}from"./q-CrZFzTXD.js";const t=()=>{let[t]=e();return navigator.clipboard.writeText(t.item.copy)};export{t as s_BEKbUdvJi74};

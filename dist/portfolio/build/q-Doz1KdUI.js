@@ -1,1 +1,0 @@
-import{M as e,P as t}from"./q-CrZFzTXD.js";const n=({cleanup:t})=>{let[n,r]=e(),i=setInterval(()=>{r.value||n()},5e3);t(()=>clearInterval(i))};export{t as _hW,n as s_a1xSNDHw0K0};

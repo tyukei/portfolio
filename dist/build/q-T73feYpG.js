@@ -1,1 +1,0 @@
-import{M as e}from"./q-iIiPrPDe.js";import{n as t}from"./q-COxT64up.js";const n=()=>{let[n]=e();return(n.value-t)/1e3/3600/24/365.24219};export{n as s_IJKumvJMqao};

@@ -1,1 +1,0 @@
-import{M as e,P as t}from"./q-iIiPrPDe.js";const n=()=>{let[t]=e();localStorage.getItem(`theme`)===`light`&&(t.value=!1,document.documentElement.classList.add(`light`))};export{t as _hW,n as s_FWOPW5w802Y};

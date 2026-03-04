@@ -1,1 +1,0 @@
-import{M as e,P as t}from"./q-iIiPrPDe.js";const n=()=>{let[t,n]=e();return n(t)};export{t as _hW,n as s_nwNZeUspUDg};

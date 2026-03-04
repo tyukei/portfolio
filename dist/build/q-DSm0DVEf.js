@@ -1,1 +1,0 @@
-import{M as e,P as t}from"./q-iIiPrPDe.js";const n=async(t,n)=>{let[r]=e(),i=new FormData(n),a=new URLSearchParams;i.forEach((e,t)=>{typeof e==`string`&&a.append(t,e)}),await r(`?`+a.toString(),{type:`form`,forceReload:!0})};export{t as _hW,n as s_A65U075NLA8};

@@ -1,1 +1,0 @@
-import{M as e}from"./q-CrZFzTXD.js";const t=()=>{let[t,n]=e();t.value=n};export{t as s_pVq0j8p79nw};

@@ -1,1 +1,0 @@
-const e=`:root{view-transition-name:none}`;export{e as s_JDKVNIXwgEk};

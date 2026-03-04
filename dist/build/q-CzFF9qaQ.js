@@ -1,1 +1,0 @@
-import{M as e}from"./q-iIiPrPDe.js";const t=t=>{let[n,r]=e(),i=t.target.getBoundingClientRect();r.value={date:n.date,data:n.data,x:i.left+i.width/2,y:i.top}};export{t as s_5Vpc7kbyAn0};

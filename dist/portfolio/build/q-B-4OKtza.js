@@ -1,1 +1,0 @@
-import{t as e}from"./q-D_1LUVVv.js";var t=()=>e(()=>import(`./q-D8VJDwHK.js`),[]);const n=[[`/portfolio/`,[t,()=>e(()=>import(`./q-BDxXAFe4.js`),[])]],[`portfolio/now/`,[t,()=>e(()=>import(`./q-CnNbSIfV.js`),[])]]],r=[],i=!0,a=!0;export{i,r as n,n as r,a as t};

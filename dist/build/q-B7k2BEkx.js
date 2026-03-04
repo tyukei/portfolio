@@ -1,1 +1,0 @@
-import{M as e,P as t}from"./q-iIiPrPDe.js";import{r as n}from"./q-DeIJRJAT.js";const r=async()=>{let[t,r]=e();try{r.value=(await n()).slice(0,3)}catch{}finally{t.value=!1}};export{t as _hW,r as s_O74AJFLT7E8};

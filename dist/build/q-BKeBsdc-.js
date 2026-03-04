@@ -1,1 +1,0 @@
-import{t as e}from"./q-Db9bF7-q.js";import{c as t,f as n,p as r,u as i,y as a}from"./q-iIiPrPDe.js";const o=o=>{let s=n(0);return i(r(()=>e(()=>import(`./q-BE2klA_j.js`),[]),`s_2rNKFCYxMU8`,[s,o])),t(`span`,null,null,a(e=>e.value,[s]),3,`1Y_0`)};export{o as s_6wWAGi7qod0};

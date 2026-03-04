@@ -1,1 +1,0 @@
-import{M as e,P as t}from"./q-iIiPrPDe.js";const n=async({track:t})=>{let[n,r]=e(),i=t(n);if(!i?.resolve)return;let a=r?.[i.id];if(a){let e=await a(i.data);i.resolve(e)}};export{t as _hW,n as s_XOF7VN9Eiwg};
