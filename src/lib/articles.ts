@@ -11,6 +11,13 @@ export interface ArticlesResponse {
   articles: ZennArticle[]
 }
 
+function apiUrl(path: string): string {
+  const base = import.meta.env.BASE_URL || '/'
+  const normalizedBase = base.endsWith('/') ? base : `${base}/`
+  const normalizedPath = path.startsWith('/') ? path.slice(1) : path
+  return `${normalizedBase}${normalizedPath}`
+}
+
 async function safeFetchJson<T>(url: string): Promise<T> {
   let res: Response
   try {
@@ -29,7 +36,7 @@ async function safeFetchJson<T>(url: string): Promise<T> {
 }
 
 export async function fetchArticles(count = 6): Promise<ZennArticle[]> {
-  const data = await safeFetchJson<ArticlesResponse>(`/api/articles?count=${count}`)
+  const data = await safeFetchJson<ArticlesResponse>(apiUrl(`api/articles?count=${count}`))
   return data.articles ?? []
 }
 
@@ -47,7 +54,7 @@ export interface EventsResponse {
 }
 
 export async function fetchEvents(count = 8): Promise<ConnpassEvent[]> {
-  const data = await safeFetchJson<EventsResponse>(`/api/events?count=${count}`)
+  const data = await safeFetchJson<EventsResponse>(apiUrl(`api/events?count=${count}`))
   return data.events ?? []
 }
 
@@ -63,6 +70,6 @@ export interface TalksResponse {
 }
 
 export async function fetchTalks(): Promise<Talk[]> {
-  const data = await safeFetchJson<TalksResponse>('/api/talks')
+  const data = await safeFetchJson<TalksResponse>(apiUrl('api/talks'))
   return data.talks ?? []
 }

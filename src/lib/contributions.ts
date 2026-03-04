@@ -18,8 +18,15 @@ export interface ContributionData {
   summary: ContributionSummary
 }
 
+function apiUrl(path: string): string {
+  const base = import.meta.env.BASE_URL || '/'
+  const normalizedBase = base.endsWith('/') ? base : `${base}/`
+  const normalizedPath = path.startsWith('/') ? path.slice(1) : path
+  return `${normalizedBase}${normalizedPath}`
+}
+
 export async function fetchContributions(year?: number): Promise<ContributionData> {
-  const url = year ? `/api/heatmap?year=${year}` : '/api/heatmap'
+  const url = year ? apiUrl(`api/heatmap?year=${year}`) : apiUrl('api/heatmap')
   let res: Response
   try {
     res = await fetch(url)
