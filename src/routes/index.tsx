@@ -15,6 +15,7 @@ interface StaticPortfolioData {
   events: ConnpassEvent[]
   talks: Talk[]
   contributionsByYear: Record<number, ContributionData>
+  selectedYear: number
 }
 
 const EMPTY_CONTRIBUTION: ContributionData = {
@@ -42,9 +43,14 @@ async function readJsonFile<T>(path: string): Promise<T | null> {
   }
 }
 
-export const useStaticPortfolioData = routeLoader$(async () => {
+export const useStaticPortfolioData = routeLoader$(async ({ url }) => {
   const root = process.cwd()
   const staticApiDir = join(root, 'public', 'static-api')
+  const yearRaw = Number.parseInt(url.searchParams.get('year') ?? '', 10)
+  const selectedYear =
+    Number.isFinite(yearRaw) && yearRaw >= 2020 && yearRaw <= CURRENT_YEAR
+      ? yearRaw
+      : CURRENT_YEAR
 
   const [articlesJson, eventsJson, talksJson] = await Promise.all([
     readJsonFile<{ articles?: ZennArticle[] }>(join(staticApiDir, 'articles.json')),
@@ -67,6 +73,7 @@ export const useStaticPortfolioData = routeLoader$(async () => {
     events: eventsJson?.events ?? [],
     talks: talksJson?.talks ?? [],
     contributionsByYear,
+    selectedYear,
   } satisfies StaticPortfolioData
 })
 
@@ -87,7 +94,10 @@ export default component$(() => {
         />
 
         {/* Row 2: 草グラフ — full width */}
-        <ContributionSection byYear={data.value.contributionsByYear} />
+        <ContributionSection
+          byYear={data.value.contributionsByYear}
+          selectedYear={data.value.selectedYear}
+        />
 
         {/* Row 3: Skills */}
         <SkillConstellation />

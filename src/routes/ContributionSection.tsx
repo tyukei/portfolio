@@ -1,4 +1,4 @@
-import { component$, useSignal } from '@builder.io/qwik'
+import { component$ } from '@builder.io/qwik'
 import type { ContributionData } from '~/lib/contributions'
 import { ContributionGraph, ContributionLegend } from './ContributionGraph'
 import { StreakBadge } from './StreakBadge'
@@ -11,30 +11,30 @@ const YEARS = Array.from(
 
 export const ContributionSection = component$<{
   byYear: Record<number, ContributionData>
+  selectedYear: number
 }>((props) => {
-  const selectedYear = useSignal(CURRENT_YEAR)
-  const data = props.byYear[selectedYear.value] ?? null
+  const base = import.meta.env.BASE_URL || '/'
+  const homeHref = base.endsWith('/') ? base : `${base}/`
+  const selectedYear = props.selectedYear
+  const data = props.byYear[selectedYear] ?? null
 
   return (
     <div class="flex flex-col gap-3">
       {/* Year tabs */}
       <div class="flex items-center gap-2 flex-wrap">
         {YEARS.map((y) => (
-          <button
+          <a
             key={y}
-            type="button"
             class="px-3 py-1 rounded-full text-sm font-medium transition-all"
             style={
-              selectedYear.value === y
+              selectedYear === y
                 ? 'background:var(--accent);color:#000;'
                 : 'background:transparent;color:var(--text-2);border:1px solid var(--border);'
             }
-            onClick$={() => {
-              selectedYear.value = y
-            }}
+            href={y === CURRENT_YEAR ? homeHref : `${homeHref}?year=${y}`}
           >
             {y}
-          </button>
+          </a>
         ))}
       </div>
 
@@ -43,7 +43,7 @@ export const ContributionSection = component$<{
         class="rounded-xl p-4 md:p-5"
         style="background:var(--bg-surface);border:1px solid var(--border)"
       >
-        <ContributionGraph data={data} loading={false} year={selectedYear.value} />
+        <ContributionGraph data={data} loading={false} year={selectedYear} />
       </div>
 
       <div class="flex flex-wrap items-center justify-between gap-3">
