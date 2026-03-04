@@ -306,9 +306,9 @@ function talksToByDate(talks) {
 async function fetchGitHubMergedByDate(year) {
   const merged = {}
   for (const username of GITHUB_USERS) {
-    const token = resolveGithubTokenForUser(username)
-    if (!token) continue
-    const one = await fetchGitHubContribByDate(username, year, token)
+    const tokens = resolveGithubTokensForUser(username)
+    if (tokens.length === 0) continue
+    const one = await fetchGitHubContribByDate(username, year, tokens)
     for (const [date, count] of Object.entries(one)) {
       merged[date] = (merged[date] ?? 0) + count
     }
@@ -316,15 +316,26 @@ async function fetchGitHubMergedByDate(year) {
   return merged
 }
 
-function resolveGithubTokenForUser(username) {
+function resolveGithubTokensForUser(username) {
   const suffix = username.toUpperCase().replace(/[^A-Z0-9]/g, '_')
   const newKey = `PORTFOLIO_TOKEN_${suffix}`
   const oldKey = `GITHUB_TOKEN_${suffix}`
-  return process.env[newKey] || process.env[oldKey] || process.env.GITHUB_TOKEN || ''
+  const seen = new Set()
+  const out = []
+  for (const token of [
+    process.env[newKey],
+    process.env[oldKey],
+    process.env.GITHUB_TOKEN,
+  ]) {
+    if (!token || seen.has(token)) continue
+    seen.add(token)
+    out.push(token)
+  }
+  return out
 }
 
 async function fetchGitHubUserByDate(username, year, token) {
-  if (!token) return {}
+  if (!token) throw new Error('missing token')
 
   const gql = `
     query($username: String!, $from: DateTime!, $to: DateTime!) {
@@ -346,18 +357,7 @@ async function fetchGitHubUserByDate(username, year, token) {
   const from = `${year}-01-01T00:00:00Z`
   const to = `${year}-12-31T23:59:59Z`
 
-  const data = await fetchJson('https://api.github.com/graphql', {
-    method: 'POST',
-    headers: {
-      Authorization: `bearer ${token}`,
-      'Content-Type': 'application/json',
-      'User-Agent': 'portfolio-site/1.0',
-    },
-    body: JSON.stringify({
-      query: gql,
-      variables: { username, from, to },
-    }),
-  })
+  const data = await fetchGitHubGraphQL(token, gql, { username, from, to })
 
   const out = {}
   const days =
@@ -393,18 +393,7 @@ async function fetchGitHubViewerByDate(year, token) {
     }
   `
 
-  const data = await fetchJson('https://api.github.com/graphql', {
-    method: 'POST',
-    headers: {
-      Authorization: `bearer ${token}`,
-      'Content-Type': 'application/json',
-      'User-Agent': 'portfolio-site/1.0',
-    },
-    body: JSON.stringify({
-      query: gql,
-      variables: { from, to },
-    }),
-  })
+  const data = await fetchGitHubGraphQL(token, gql, { from, to })
 
   const out = {}
   const days =
@@ -422,12 +411,35 @@ async function fetchGitHubViewerByDate(year, token) {
   }
 }
 
-async function fetchGitHubContribByDate(username, year, token) {
-  const viewer = await fetchGitHubViewerByDate(year, token)
-  if (viewer.login && viewer.login.toLowerCase() === username.toLowerCase()) {
-    return viewer.contributions
+async function fetchGitHubContribByDate(username, year, tokens) {
+  for (const token of tokens) {
+    try {
+      const viewer = await fetchGitHubViewerByDate(year, token)
+      if (viewer.login && viewer.login.toLowerCase() === username.toLowerCase()) {
+        return viewer.contributions
+      }
+      return await fetchGitHubUserByDate(username, year, token)
+    } catch {
+      // try next token
+    }
   }
-  return fetchGitHubUserByDate(username, year, token)
+  return {}
+}
+
+async function fetchGitHubGraphQL(token, query, variables) {
+  const res = await fetch('https://api.github.com/graphql', {
+    method: 'POST',
+    headers: {
+      Authorization: `bearer ${token}`,
+      'Content-Type': 'application/json',
+      'User-Agent': 'portfolio-site/1.0',
+    },
+    body: JSON.stringify({ query, variables }),
+  })
+  if (!res.ok) throw new Error(`GitHub GraphQL HTTP ${res.status}`)
+  const data = await res.json()
+  if (data?.errors?.length) throw new Error('GitHub GraphQL errors')
+  return data
 }
 
 function mergeHeatmapByDate({

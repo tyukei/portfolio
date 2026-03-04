@@ -153,7 +153,12 @@ async function fetchGitHubMerged(
   if (!token) return {}
   const merged: Record<string, number> = {}
   for (const user of users) {
-    const one = await fetchGitHubContribByDate(user, year, token)
+    let one: Record<string, number> = {}
+    try {
+      one = await fetchGitHubContribByDate(user, year, token)
+    } catch {
+      one = {}
+    }
     for (const [date, count] of Object.entries(one)) {
       merged[date] = (merged[date] ?? 0) + count
     }
@@ -197,25 +202,11 @@ async function fetchGitHubUserByDate(
     }
   `
 
-  const data = await fetchJson<GitHubGraphQLResponse>(
-    'https://api.github.com/graphql',
-    {
-      method: 'POST',
-      headers: {
-        'User-Agent': 'portfolio-site/1.0',
-        Authorization: `bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: gql,
-        variables: { username, from, to },
-      }),
-    },
-  )
+  const data = await fetchGitHubGraphQL(token, gql, { username, from, to })
 
   const out: Record<string, number> = {}
   const days =
-    data?.data?.user?.contributionsCollection?.contributionCalendar?.weeks?.flatMap(
+    data.data?.user?.contributionsCollection?.contributionCalendar?.weeks?.flatMap(
       (w) => w.contributionDays ?? [],
     ) ?? []
 
@@ -252,25 +243,11 @@ async function fetchGitHubViewerByDate(
     }
   `
 
-  const data = await fetchJson<GitHubGraphQLResponse>(
-    'https://api.github.com/graphql',
-    {
-      method: 'POST',
-      headers: {
-        'User-Agent': 'portfolio-site/1.0',
-        Authorization: `bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: gql,
-        variables: { from, to },
-      }),
-    },
-  )
+  const data = await fetchGitHubGraphQL(token, gql, { from, to })
 
   const out: Record<string, number> = {}
   const days =
-    data?.data?.viewer?.contributionsCollection?.contributionCalendar?.weeks?.flatMap(
+    data.data?.viewer?.contributionsCollection?.contributionCalendar?.weeks?.flatMap(
       (w) => w.contributionDays ?? [],
     ) ?? []
   for (const day of days) {
@@ -280,9 +257,35 @@ async function fetchGitHubViewerByDate(
   }
 
   return {
-    login: data?.data?.viewer?.login ?? '',
+    login: data.data?.viewer?.login ?? '',
     contributions: out,
   }
+}
+
+async function fetchGitHubGraphQL(
+  token: string,
+  query: string,
+  variables: Record<string, string>,
+): Promise<GitHubGraphQLResponse> {
+  const res = await fetch('https://api.github.com/graphql', {
+    method: 'POST',
+    headers: {
+      'User-Agent': 'portfolio-site/1.0',
+      Authorization: `bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ query, variables }),
+  })
+  if (!res.ok) {
+    throw new Error(`GitHub GraphQL HTTP ${res.status}`)
+  }
+  const data = (await res.json()) as GitHubGraphQLResponse & {
+    errors?: unknown[]
+  }
+  if (data.errors?.length) {
+    throw new Error('GitHub GraphQL errors')
+  }
+  return data
 }
 
 function tokenFingerprint(token: string): string {
