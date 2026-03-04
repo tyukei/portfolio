@@ -12,22 +12,7 @@ const YEARS = Array.from(
 export const ContributionSection = component$<{
   byYear: Record<number, ContributionData>
 }>((props) => {
-  const bestYear = YEARS.reduce((best, year) => {
-    const data = props.byYear[year]
-    const score =
-      (data?.summary.github ?? 0) +
-      (data?.summary.zenn ?? 0) +
-      (data?.summary.connpass ?? 0) +
-      (data?.summary.speakerdeck ?? 0)
-    const bestData = props.byYear[best]
-    const bestScore =
-      (bestData?.summary.github ?? 0) +
-      (bestData?.summary.zenn ?? 0) +
-      (bestData?.summary.connpass ?? 0) +
-      (bestData?.summary.speakerdeck ?? 0)
-    return score > bestScore ? year : best
-  }, CURRENT_YEAR)
-  const selectedYear = useSignal(bestYear)
+  const selectedYear = useSignal(CURRENT_YEAR)
   const data = props.byYear[selectedYear.value] ?? null
 
   return (

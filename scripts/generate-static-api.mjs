@@ -317,8 +317,10 @@ async function fetchGitHubMergedByDate(year) {
 }
 
 function resolveGithubTokenForUser(username) {
-  const key = `GITHUB_TOKEN_${username.toUpperCase().replace(/[^A-Z0-9]/g, '_')}`
-  return process.env[key] || process.env.GITHUB_TOKEN || ''
+  const suffix = username.toUpperCase().replace(/[^A-Z0-9]/g, '_')
+  const newKey = `PORTFOLIO_TOKEN_${suffix}`
+  const oldKey = `GITHUB_TOKEN_${suffix}`
+  return process.env[newKey] || process.env[oldKey] || process.env.GITHUB_TOKEN || ''
 }
 
 async function fetchGitHubUserByDate(username, year, token) {
