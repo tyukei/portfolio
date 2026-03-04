@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # .env ファイルが存在するかチェック
-if [ ! -f "api/.env" ]; then
-    echo "エラー: api/.env が見つかりません。"
+if [ ! -f ".env" ]; then
+    echo "エラー: .env が見つかりません。"
     exit 1
 fi
 
@@ -10,7 +10,7 @@ echo "🚀 GitHub Secrets に変数を登録します..."
 
 # 1. 既存の .env (GITHUB_TOKEN) を登録
 echo "🔑 GITHUB_TOKEN を登録中..."
-gh secret set -f api/.env
+gh secret set -f .env
 
 # 2. FTP情報の入力プロンプトと変数の登録
 echo ""

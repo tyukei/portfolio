@@ -2,7 +2,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
 const CACHE_ROOT = join(process.cwd(), '.cache', 'api')
-const LEGACY_ENV_PATH = join(process.cwd(), 'api', '.env')
+const ENV_PATH = join(process.cwd(), '.env')
 
 let cachedGithubToken: string | null | undefined
 
@@ -108,7 +108,7 @@ export async function getGithubToken(): Promise<string | undefined> {
   if (cachedGithubToken !== undefined) return cachedGithubToken ?? undefined
 
   try {
-    const raw = await readFile(LEGACY_ENV_PATH, 'utf-8')
+    const raw = await readFile(ENV_PATH, 'utf-8')
     const fromFile = parseDotEnv(raw).GITHUB_TOKEN
     cachedGithubToken = fromFile ?? null
     return fromFile
