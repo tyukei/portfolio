@@ -33,6 +33,10 @@ jobs:
       - name: Build
         env:
           BASE_PATH: /portfolio/
+          GITHUB_TOKEN: ${{ secrets.PORTFOLIO_GITHUB_TOKEN }}
+          GITHUB_TOKEN_TYUKEI: ${{ secrets.GITHUB_TOKEN_TYUKEI }}
+          GITHUB_TOKEN_CHUKEI2: ${{ secrets.GITHUB_TOKEN_CHUKEI2 }}
+          CONNPASS_API_KEY: ${{ secrets.CONNPASS_API_KEY }}
         run: npm run build
 
       - name: Setup Pages
