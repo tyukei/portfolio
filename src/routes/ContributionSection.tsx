@@ -12,7 +12,10 @@ const YEARS = Array.from(
 export const ContributionSection = component$<{
   byYear: Record<number, ContributionData>
 }>((props) => {
-  const selectedYear = useSignal(CURRENT_YEAR)
+  const bestYear =
+    YEARS.find((y) => Object.keys(props.byYear[y]?.contributions ?? {}).length > 0) ??
+    CURRENT_YEAR
+  const selectedYear = useSignal(bestYear)
   const data = props.byYear[selectedYear.value] ?? null
 
   return (

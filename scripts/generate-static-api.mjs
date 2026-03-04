@@ -18,12 +18,24 @@ const [articles, events, talks, zennByDate, connpassByDate] = await Promise.all(
   fetchEvents(),
   fetchTalks(),
   fetchZennByDate(ZENN_USER),
-  fetchConnpassByDate(CONNPASS_USER),
+  fetchConnpassByDate(['tyukei', 'chukei']),
 ])
 
-await writeJson(join(PUBLIC_API_DIR, 'articles.json'), { articles })
-await writeJson(join(PUBLIC_API_DIR, 'events.json'), { events })
-await writeJson(join(PUBLIC_API_DIR, 'talks.json'), { talks })
+await writeJsonPreferNonEmpty(
+  join(PUBLIC_API_DIR, 'articles.json'),
+  { articles },
+  (v) => Array.isArray(v?.articles) && v.articles.length > 0,
+)
+await writeJsonPreferNonEmpty(
+  join(PUBLIC_API_DIR, 'events.json'),
+  { events },
+  (v) => Array.isArray(v?.events) && v.events.length > 0,
+)
+await writeJsonPreferNonEmpty(
+  join(PUBLIC_API_DIR, 'talks.json'),
+  { talks },
+  (v) => Array.isArray(v?.talks) && v.talks.length > 0,
+)
 
 const speakerDeckByDate = talksToByDate(talks)
 const currentYear = new Date().getFullYear()
@@ -37,9 +49,17 @@ for (let year = START_YEAR; year <= currentYear; year++) {
     connpassByDate,
     speakerDeckByDate,
   })
-  await writeJson(join(PUBLIC_API_DIR, 'heatmap', `${year}.json`), heatmap)
+  await writeJsonPreferNonEmpty(
+    join(PUBLIC_API_DIR, 'heatmap', `${year}.json`),
+    heatmap,
+    (v) => Object.keys(v?.contributions ?? {}).length > 0,
+  )
   if (year === currentYear) {
-    await writeJson(join(PUBLIC_API_DIR, 'heatmap.json'), heatmap)
+    await writeJsonPreferNonEmpty(
+      join(PUBLIC_API_DIR, 'heatmap.json'),
+      heatmap,
+      (v) => Object.keys(v?.contributions ?? {}).length > 0,
+    )
   }
 }
 
@@ -73,6 +93,25 @@ function stripQuotes(v) {
 async function writeJson(path, data) {
   await mkdir(join(path, '..'), { recursive: true })
   await writeFile(path, `${JSON.stringify(data)}\n`, 'utf-8')
+}
+
+async function readJson(path) {
+  try {
+    const raw = await readFile(path, 'utf-8')
+    return JSON.parse(raw)
+  } catch {
+    return null
+  }
+}
+
+async function writeJsonPreferNonEmpty(path, nextData, isNonEmpty) {
+  if (isNonEmpty(nextData)) {
+    await writeJson(path, nextData)
+    return
+  }
+  const prev = await readJson(path)
+  if (isNonEmpty(prev)) return
+  await writeJson(path, nextData)
 }
 
 async function fetchJson(url, init = {}, timeoutMs = 15000) {
@@ -237,15 +276,17 @@ async function fetchZennByDate(username) {
   return out
 }
 
-async function fetchConnpassByDate(username) {
+async function fetchConnpassByDate(usernames) {
   const out = {}
-  const data = await fetchJson(
-    `https://connpass.com/api/v1/event/?nickname=${username}&count=100`,
-    { headers: { 'User-Agent': 'portfolio-site/1.0' } },
-  )
-  for (const ev of data?.events ?? []) {
-    const date = (ev?.started_at ?? '').slice(0, 10)
-    if (date) out[date] = (out[date] ?? 0) + 1
+  for (const username of usernames) {
+    const data = await fetchJson(
+      `https://connpass.com/api/v1/event/?nickname=${username}&count=100`,
+      { headers: { 'User-Agent': 'portfolio-site/1.0' } },
+    )
+    for (const ev of data?.events ?? []) {
+      const date = (ev?.started_at ?? '').slice(0, 10)
+      if (date) out[date] = (out[date] ?? 0) + 1
+    }
   }
   return out
 }
