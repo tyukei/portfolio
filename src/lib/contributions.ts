@@ -18,54 +18,6 @@ export interface ContributionData {
   summary: ContributionSummary
 }
 
-function apiUrl(path: string): string {
-  const base = import.meta.env.BASE_URL || '/'
-  const normalizedBase = base.endsWith('/') ? base : `${base}/`
-  const normalizedPath = path.startsWith('/') ? path.slice(1) : path
-  return `${normalizedBase}${normalizedPath}`
-}
-
-async function fetchContributionFrom(urls: string[]): Promise<ContributionData> {
-  let lastErr: Error | null = null
-  for (const url of urls) {
-    try {
-      let res: Response
-      try {
-        res = await fetch(url)
-      } catch {
-        throw new Error('API not reachable')
-      }
-
-      if (!res.ok) {
-        throw new Error(`heatmap API error: ${res.status}`)
-      }
-
-      const ct = res.headers.get('content-type') ?? ''
-      if (!ct.includes('json')) {
-        throw new Error('heatmap API did not return JSON')
-      }
-
-      try {
-        return (await res.json()) as ContributionData
-      } catch {
-        throw new Error('API レスポンスの JSON パースに失敗しました')
-      }
-    } catch (e) {
-      lastErr = e instanceof Error ? e : new Error('Failed to load contributions')
-    }
-  }
-  throw lastErr ?? new Error('Failed to load contributions')
-}
-
-export async function fetchContributions(year?: number): Promise<ContributionData> {
-  const y = year ?? new Date().getFullYear()
-  return fetchContributionFrom([
-    apiUrl(`api/heatmap?year=${y}`),
-    apiUrl(`static-api/heatmap/${y}.json`),
-    apiUrl('static-api/heatmap.json'),
-  ])
-}
-
 /**
  * Returns a sorted array of cells covering the full calendar year (Jan 1 – Dec 31),
  * padded so the first column starts on Sunday.
