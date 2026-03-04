@@ -27,8 +27,11 @@ jobs:
         with:
           node-version: 20
 
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
       - name: Install dependencies
-        run: npm install
+        run: bun install --frozen-lockfile
 
       - name: Build
         env:
@@ -37,7 +40,7 @@ jobs:
           GITHUB_TOKEN_TYUKEI: ${{ secrets.GITHUB_TOKEN_TYUKEI }}
           GITHUB_TOKEN_CHUKEI2: ${{ secrets.GITHUB_TOKEN_CHUKEI2 }}
           CONNPASS_API_KEY: ${{ secrets.CONNPASS_API_KEY }}
-        run: npm run build
+        run: bun run build
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
