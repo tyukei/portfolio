@@ -1,4 +1,5 @@
 import type { RequestHandler } from '@builder.io/qwik-city'
+import { createHash } from 'node:crypto'
 import {
   clampInt,
   fetchJson,
@@ -60,7 +61,9 @@ const SPEAKERDECK_USER = 'tyukei'
 export const onGet: RequestHandler = async ({ json, query }) => {
   const currentYear = new Date().getFullYear()
   const year = clampInt(query.get('year'), currentYear, 2008, currentYear)
-  const cacheKey = `heatmap_${year}.json`
+  const githubToken = await getGithubToken()
+  const tokenKey = githubToken ? tokenFingerprint(githubToken) : 'no-token'
+  const cacheKey = `heatmap_${year}_${todayKey()}_${tokenKey}.json`
 
   const cached = await readJsonCache<ContributionData>(cacheKey)
   if (cached) {
@@ -69,7 +72,7 @@ export const onGet: RequestHandler = async ({ json, query }) => {
   }
 
   const [github, zenn, connpass, speakerdeck] = await Promise.all([
-    fetchGitHubMerged(GITHUB_USERS, year),
+    fetchGitHubMerged(GITHUB_USERS, year, githubToken),
     fetchZennByDate(ZENN_USER),
     fetchConnpassByDate(CONNPASS_USER),
     fetchSpeakerDeckByDate(SPEAKERDECK_USER),
@@ -117,17 +120,27 @@ export const onGet: RequestHandler = async ({ json, query }) => {
   }
 
   const response: ContributionData = { contributions, summary }
-  await writeJsonCache(cacheKey, response)
+  const hasToken = Boolean(githubToken)
+  const githubEmpty = summary.github === 0
+  if (!(hasToken && githubEmpty)) {
+    await writeJsonCache(cacheKey, response)
+  }
   json(200, response)
+}
+
+function todayKey(): string {
+  return new Date().toISOString().slice(0, 10)
 }
 
 async function fetchGitHubMerged(
   users: string[],
   year: number,
+  token?: string,
 ): Promise<Record<string, number>> {
+  if (!token) return {}
   const merged: Record<string, number> = {}
   for (const user of users) {
-    const one = await fetchGitHubUserByDate(user, year)
+    const one = await fetchGitHubUserByDate(user, year, token)
     for (const [date, count] of Object.entries(one)) {
       merged[date] = (merged[date] ?? 0) + count
     }
@@ -138,10 +151,8 @@ async function fetchGitHubMerged(
 async function fetchGitHubUserByDate(
   username: string,
   year: number,
+  token: string,
 ): Promise<Record<string, number>> {
-  const token = await getGithubToken()
-  if (!token) return {}
-
   const from = `${year}-01-01T00:00:00Z`
   const to = `${year}-12-31T23:59:59Z`
   const gql = `
@@ -190,6 +201,10 @@ async function fetchGitHubUserByDate(
   }
 
   return out
+}
+
+function tokenFingerprint(token: string): string {
+  return createHash('sha256').update(token).digest('hex').slice(0, 8)
 }
 
 async function fetchZennByDate(username: string): Promise<Record<string, number>> {
