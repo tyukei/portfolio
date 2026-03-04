@@ -14,6 +14,9 @@ export const ContributionSection = component$<{
   selectedYear: number
 }>((props) => {
   const selectedYear = props.selectedYear
+  const ACTIVE_STYLE = 'background:var(--accent);color:#000;'
+  const INACTIVE_STYLE =
+    'background:transparent;color:var(--text-2);border:1px solid var(--border);'
   const ACTIVE_CLASS = 'bg-[var(--accent)] text-black'
   const INACTIVE_CLASS =
     'bg-transparent text-[var(--text-2)] border border-[var(--border)]'
@@ -27,9 +30,11 @@ export const ContributionSection = component$<{
           <a
             key={y}
             href={y === CURRENT_YEAR ? `#${sectionId}` : `?year=${y}#${sectionId}`}
+            data-year-tab={String(y)}
             class={`px-3 py-1 rounded-full text-sm font-medium transition-all ${
               selectedYear === y ? ACTIVE_CLASS : INACTIVE_CLASS
             }`}
+            style={selectedYear === y ? ACTIVE_STYLE : INACTIVE_STYLE}
             aria-current={selectedYear === y ? 'page' : undefined}
           >
             {y}
@@ -60,6 +65,51 @@ export const ContributionSection = component$<{
           </div>
         )
       })}
+
+      <script
+        dangerouslySetInnerHTML={`(() => {
+  const root = document.getElementById('${sectionId}');
+  if (!root) return;
+  const CURRENT_YEAR = '${CURRENT_YEAR}';
+  const ACTIVE_STYLE = '${ACTIVE_STYLE}';
+  const INACTIVE_STYLE = '${INACTIVE_STYLE}';
+  const tabs = Array.from(root.querySelectorAll('[data-year-tab]'));
+  const panels = Array.from(root.querySelectorAll('[data-year-panel]'));
+  if (!tabs.length || !panels.length) return;
+
+  const validYears = new Set(tabs.map((t) => t.getAttribute('data-year-tab')));
+  const fromUrl = new URL(window.location.href).searchParams.get('year');
+  const initialYear = validYears.has(fromUrl) ? fromUrl : CURRENT_YEAR;
+
+  const setYear = (year) => {
+    for (const tab of tabs) {
+      const active = tab.getAttribute('data-year-tab') === year;
+      tab.setAttribute('style', active ? ACTIVE_STYLE : INACTIVE_STYLE);
+      if (active) tab.setAttribute('aria-current', 'page');
+      else tab.removeAttribute('aria-current');
+    }
+    for (const panel of panels) {
+      panel.setAttribute('style', panel.getAttribute('data-year-panel') === year ? '' : 'display:none;');
+    }
+  };
+
+  setYear(initialYear);
+
+  for (const tab of tabs) {
+    tab.addEventListener('click', (e) => {
+      e.preventDefault();
+      const year = tab.getAttribute('data-year-tab');
+      if (!year) return;
+      setYear(year);
+      const url = new URL(window.location.href);
+      if (year === CURRENT_YEAR) url.searchParams.delete('year');
+      else url.searchParams.set('year', year);
+      url.hash = '${sectionId}';
+      window.history.replaceState(null, '', url.toString());
+    });
+  }
+})();`}
+      />
     </div>
   )
 })
