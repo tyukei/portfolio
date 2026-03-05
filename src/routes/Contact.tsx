@@ -140,9 +140,7 @@ export const Contact = component$(() => {
                 style="display:block;border:none;color-scheme:light"
                 title="お問い合わせフォーム"
                 loading="lazy"
-              >
-                Loading…
-              </iframe>
+              />
             </div>
 
             <p class="text-xs mt-3" style="color:var(--text-2);opacity:0.5">

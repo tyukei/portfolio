@@ -1,435 +1,447 @@
-import { component$, useSignal, useStylesScoped$, useVisibleTask$ } from '@builder.io/qwik'
-import { CONSTELLATIONS, type Star } from '~/data/skills'
+import { component$, useSignal, useVisibleTask$ } from '@builder.io/qwik'
 
-const CANVAS_W = 600
-const CANVAS_H = 400
-
-interface HoverInfo {
+// ─── Skill data ────────────────────────────────────────────────────────────────
+// theta = longitude (0–2π), phi = latitude (0=north, π=south)
+interface Skill {
   name: string
-  level: number
+  category: string
   color: string
-  x: number
-  y: number
+  level: number        // 1–5  →  node size + brightness
+  theta: number
+  phi: number
+  interest?: boolean   // true = "exploring"  →  dashed outline, smaller
 }
 
+const SKILLS: Skill[] = [
+  // Data Engineering ─ upper-front-left
+  { name: 'Python',      category: 'Data Engineering', color: '#22d3ee', level: 5, theta: 0.38, phi: 0.88 },
+  { name: 'BigQuery',    category: 'Data Engineering', color: '#22d3ee', level: 4, theta: 0.72, phi: 1.05 },
+  { name: 'SQL',         category: 'Data Engineering', color: '#22d3ee', level: 4, theta: 0.18, phi: 1.22 },
+  { name: 'dbt',         category: 'Data Engineering', color: '#22d3ee', level: 3, theta: 0.52, phi: 1.38 },
+  { name: 'Pandas',      category: 'Data Engineering', color: '#22d3ee', level: 4, theta: 0.88, phi: 0.92 },
+  // AI / LLM ─ upper-front-center
+  { name: 'LLM Agent',   category: 'AI / LLM',         color: '#a78bfa', level: 4, theta: 1.22, phi: 0.64 },
+  { name: 'MCP',         category: 'AI / LLM',         color: '#a78bfa', level: 3, theta: 1.52, phi: 0.76 },
+  { name: 'PyTorch',     category: 'AI / LLM',         color: '#a78bfa', level: 3, theta: 1.35, phi: 1.05 },
+  { name: 'Prompt Eng.', category: 'AI / LLM',         color: '#a78bfa', level: 4, theta: 1.68, phi: 0.88 },
+  // Frontend ─ right hemisphere
+  { name: 'TypeScript',  category: 'Frontend',          color: '#34d399', level: 4, theta: 2.02, phi: 0.82 },
+  { name: 'Qwik',        category: 'Frontend',          color: '#34d399', level: 3, theta: 2.36, phi: 0.96 },
+  { name: 'React',       category: 'Frontend',          color: '#34d399', level: 3, theta: 2.18, phi: 1.18 },
+  { name: 'UnoCSS',      category: 'Frontend',          color: '#34d399', level: 3, theta: 2.54, phi: 1.28 },
+  // Cloud ─ back-right
+  { name: 'GCP',         category: 'Cloud',             color: '#f59e0b', level: 4, theta: 3.42, phi: 1.06 },
+  { name: 'Cloud Run',   category: 'Cloud',             color: '#f59e0b', level: 3, theta: 3.74, phi: 1.28 },
+  { name: 'Terraform',   category: 'Cloud',             color: '#f59e0b', level: 2, theta: 3.22, phi: 1.48 },
+  { name: 'Pub/Sub',     category: 'Cloud',             color: '#f59e0b', level: 3, theta: 3.58, phi: 0.90 },
+  // Backend ─ back-left
+  { name: 'FastAPI',     category: 'Backend',           color: '#60a5fa', level: 4, theta: 4.48, phi: 1.18 },
+  { name: 'Node.js',     category: 'Backend',           color: '#60a5fa', level: 3, theta: 4.82, phi: 1.38 },
+  { name: 'PostgreSQL',  category: 'Backend',           color: '#60a5fa', level: 3, theta: 4.28, phi: 1.46 },
+  { name: 'Redis',       category: 'Backend',           color: '#60a5fa', level: 2, theta: 5.02, phi: 1.28 },
+  // DevOps ─ left hemisphere
+  { name: 'Docker',      category: 'DevOps',            color: '#fb7185', level: 4, theta: 5.52, phi: 0.92 },
+  { name: 'GH Actions',  category: 'DevOps',            color: '#fb7185', level: 3, theta: 5.80, phi: 1.12 },
+  { name: 'Linux',       category: 'DevOps',            color: '#fb7185', level: 3, theta: 5.66, phi: 1.38 },
+  // Interests / Exploring ─ scattered near poles
+  { name: 'Rust',        category: 'Exploring',         color: '#d1a76a', level: 2, theta: 0.95, phi: 0.46, interest: true },
+  { name: 'Go',          category: 'Exploring',         color: '#d1a76a', level: 1, theta: 2.82, phi: 0.42, interest: true },
+  { name: 'Kafka',       category: 'Exploring',         color: '#d1a76a', level: 2, theta: 4.06, phi: 0.50, interest: true },
+  { name: 'WebGL',       category: 'Exploring',         color: '#d1a76a', level: 1, theta: 1.78, phi: 0.30, interest: true },
+  { name: 'Iceberg',     category: 'Exploring',         color: '#d1a76a', level: 2, theta: 3.88, phi: 0.36, interest: true },
+]
+
+const LEGEND = [
+  { label: 'Data Engineering', color: '#22d3ee' },
+  { label: 'AI / LLM',         color: '#a78bfa' },
+  { label: 'Frontend',          color: '#34d399' },
+  { label: 'Cloud',             color: '#f59e0b' },
+  { label: 'Backend',           color: '#60a5fa' },
+  { label: 'DevOps',            color: '#fb7185' },
+  { label: 'Exploring',         color: '#d1a76a' },
+]
+
+// ─── 3D Math ───────────────────────────────────────────────────────────────────
+type V3 = [number, number, number]
+const TWO_PI = Math.PI * 2
+
+function ry(p: V3, a: number): V3 {
+  const c = Math.cos(a), s = Math.sin(a)
+  return [p[0] * c + p[2] * s, p[1], -p[0] * s + p[2] * c]
+}
+function rx(p: V3, a: number): V3 {
+  const c = Math.cos(a), s = Math.sin(a)
+  return [p[0], p[1] * c - p[2] * s, p[1] * s + p[2] * c]
+}
+function spherePt(theta: number, phi: number): V3 {
+  return [
+    Math.sin(phi) * Math.cos(theta),
+    Math.cos(phi),
+    Math.sin(phi) * Math.sin(theta),
+  ]
+}
+
+// Fibonacci sphere — most uniform sampling on a unit sphere
+function fibSphere(n: number): V3[] {
+  const out: V3[] = []
+  const golden = Math.PI * (3 - Math.sqrt(5))
+  for (let i = 0; i < n; i++) {
+    const y = 1 - (i / (n - 1)) * 2
+    const r = Math.sqrt(Math.max(0, 1 - y * y))
+    const t = golden * i
+    out.push([r * Math.cos(t), y, r * Math.sin(t)])
+  }
+  return out
+}
+
+// Procedural brain surface displacement (gyri + sulci)
+function brainBump(x: number, y: number, z: number): number {
+  return 0.068 * (
+    Math.sin(x * 6.1 + y * 3.7) * Math.cos(z * 5.2) +
+    Math.sin(y * 7.8 + z * 2.9) * Math.cos(x * 6.5) * 0.65 +
+    Math.sin(z * 8.3 + x * 1.8) * Math.cos(y * 5.9) * 0.40
+  )
+}
+
+// hex → r,g,b
+function hexRgb(hex: string): [number, number, number] {
+  const n = Number.parseInt(hex.slice(1), 16)
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255]
+}
+
+// ─── Component ─────────────────────────────────────────────────────────────────
 export const SkillConstellation = component$(() => {
-  useStylesScoped$(`
-    .brain-shell {
-      fill: var(--bg-surface);
-      stroke: var(--border);
-      stroke-width: 1.2;
-    }
-    .brain-midline {
-      stroke: var(--border);
-      stroke-width: 1;
-      stroke-dasharray: 3 3;
-      opacity: 0.8;
-    }
-    .particle {
-      fill: var(--accent);
-      opacity: 0.14;
-      transform-box: fill-box;
-      transform-origin: center;
-      animation-name: particle-float;
-      animation-timing-function: ease-in-out;
-      animation-iteration-count: infinite;
-    }
-    .constellation-group {
-      transform-box: fill-box;
-      transform-origin: center;
-      animation-name: constellation-drift;
-      animation-timing-function: ease-in-out;
-      animation-iteration-count: infinite;
-    }
-    .node-glow {
-      animation-name: node-pulse;
-      animation-timing-function: ease-in-out;
-      animation-iteration-count: infinite;
-    }
-    @keyframes constellation-drift {
-      0% {
-        transform: translate(0px, 0px);
-      }
-      25% {
-        transform: translate(2px, -2px);
-      }
-      50% {
-        transform: translate(0px, -3px);
-      }
-      75% {
-        transform: translate(-2px, -1px);
-      }
-      100% {
-        transform: translate(0px, 0px);
-      }
-    }
-    @keyframes node-pulse {
-      0% {
-        opacity: 0.10;
-      }
-      50% {
-        opacity: 0.28;
-      }
-      100% {
-        opacity: 0.10;
-      }
-    }
-    @keyframes particle-float {
-      0% {
-        opacity: 0.08;
-        transform: translateY(0px) scale(1);
-      }
-      50% {
-        opacity: 0.24;
-        transform: translateY(-10px) scale(1.08);
-      }
-      100% {
-        opacity: 0.08;
-        transform: translateY(0px) scale(1);
-      }
-    }
-  `)
-  const hovered = useSignal<HoverInfo | null>(null)
-  const sceneId = 'skills-brain-scene'
+  const canvasRef = useSignal<HTMLCanvasElement>()
 
   useVisibleTask$(({ cleanup }) => {
-    const root = document.getElementById(sceneId)
-    if (!root) return
+    const canvas = canvasRef.value
+    if (!canvas) return
 
-    const floats = Array.from(root.querySelectorAll<SVGGraphicsElement>('[data-float]'))
-    let raf = 0
-    const start = performance.now()
+    const ctx = canvas.getContext('2d')!
+    let rafId = 0
 
-    const loop = (now: number) => {
-      const t = (now - start) / 1000
-      for (const el of floats) {
-        const ax = Number.parseFloat(el.dataset.ax ?? '0')
-        const ay = Number.parseFloat(el.dataset.ay ?? '0')
-        const speed = Number.parseFloat(el.dataset.speed ?? '1')
-        const phase = Number.parseFloat(el.dataset.phase ?? '0')
-        const x = Math.sin(t * speed + phase) * ax
-        const y = Math.cos(t * speed * 0.85 + phase) * ay
-        el.style.transform = `translate(${x}px, ${y}px)`
+    // ── Responsive sizing ─────────────────────────────────────────────────
+    const container = canvas.parentElement!
+    const dpr = window.devicePixelRatio || 1
+    const resize = () => {
+      const w = container.clientWidth
+      const h = Math.round(Math.min(w * 0.72, 500))
+      canvas.width = Math.round(w * dpr)
+      canvas.height = h * dpr
+      canvas.style.width = `${w}px`
+      canvas.style.height = `${h}px`
+    }
+    resize()
+    const ro = new ResizeObserver(resize)
+    ro.observe(container)
+
+    // ── Pre-generate brain surface (once) ─────────────────────────────────
+    const N = 1800
+    const basePts = fibSphere(N)
+    // Apply displacement and re-normalise to unit sphere
+    const brainPts: V3[] = basePts.map(([x, y, z]) => {
+      const d = brainBump(x, y, z)
+      const nx = x * (1 + d), ny = y * (1 + d), nz = z * (1 + d)
+      const len = Math.sqrt(nx * nx + ny * ny + nz * nz) || 1
+      return [nx / len, ny / len, nz / len]
+    })
+    // Brightness per point: gyri (positive d) = lighter, sulci = darker
+    const brainBr: number[] = basePts.map(([x, y, z]) => brainBump(x, y, z))
+
+    // ── Skill 3D positions ─────────────────────────────────────────────────
+    const skillPts: V3[] = SKILLS.map(s => spherePt(s.theta, s.phi))
+
+    // ── Category connection pairs (pre-computed) ──────────────────────────
+    const connPairs: [number, number][] = []
+    for (let i = 0; i < SKILLS.length; i++) {
+      for (let j = i + 1; j < SKILLS.length; j++) {
+        if (
+          SKILLS[i].category === SKILLS[j].category &&
+          !SKILLS[i].interest && !SKILLS[j].interest
+        ) {
+          connPairs.push([i, j])
+        }
       }
-      raf = requestAnimationFrame(loop)
     }
 
-    raf = requestAnimationFrame(loop)
-    cleanup(() => cancelAnimationFrame(raf))
+    // ── Rotation + interaction state ──────────────────────────────────────
+    let rotY = 0.5, rotX = -0.22
+    let velY = 0.0022, velX = 0
+    let dragging = false, dragX = 0, dragY = 0
+    let hovIdx = -1
+
+    // Project a 3D point to canvas 2D
+    const project = (p: V3, R: number, cx: number, cy: number) => {
+      const [px, py, pz] = rx(ry(p, rotY), rotX)
+      const depth = pz + 2.8          // always positive: 1.8 .. 3.8
+      const scale = R * 2.2 / depth   // perspective scale
+      return { x: cx + px * scale, y: cy - py * scale, z: pz }
+    }
+
+    // ── Main render ────────────────────────────────────────────────────────
+    const render = () => {
+      const W = canvas.width, H = canvas.height
+      const cx = W / 2, cy = H / 2
+      const R = Math.min(W, H) * 0.38
+      ctx.clearRect(0, 0, W, H)
+
+      const isDark = document.documentElement.classList.contains('dark')
+      const baseRgb = isDark ? '200,165,150' : '130,90,80'
+
+      // ── Sphere background glow ─────────────────────────────────────────
+      const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 1.05)
+      grd.addColorStop(0,   isDark ? 'rgba(40,40,40,0.40)' : 'rgba(245,240,235,0.60)')
+      grd.addColorStop(0.8, isDark ? 'rgba(25,25,25,0.20)' : 'rgba(240,235,228,0.30)')
+      grd.addColorStop(1,   'rgba(0,0,0,0)')
+      ctx.beginPath()
+      ctx.arc(cx, cy, R * 1.05, 0, TWO_PI)
+      ctx.fillStyle = grd
+      ctx.fill()
+
+      // ── Project brain surface ─────────────────────────────────────────
+      type BP = { x: number; y: number; z: number; br: number }
+      const bpArr: BP[] = new Array(N)
+      for (let i = 0; i < N; i++) {
+        const { x, y, z } = project(brainPts[i], R, cx, cy)
+        bpArr[i] = { x, y, z, br: brainBr[i] }
+      }
+      bpArr.sort((a, b) => a.z - b.z)  // back → front
+
+      // Draw in 3 depth layers (batched fill for performance)
+      const drawBrainLayer = (zMin: number, zMax: number, dotR: number, alpha: number) => {
+        ctx.beginPath()
+        for (const p of bpArr) {
+          if (p.z < zMin || p.z >= zMax) continue
+          // gyri = slightly larger dots, sulci = smaller
+          const r = dotR * (p.br > 0.02 ? 1.3 : p.br < -0.02 ? 0.75 : 1.0)
+          ctx.moveTo(p.x + r, p.y)
+          ctx.arc(p.x, p.y, r, 0, TWO_PI)
+        }
+        ctx.fillStyle = `rgba(${baseRgb},${alpha})`
+        ctx.fill()
+      }
+      drawBrainLayer(-1.0, -0.25, 0.75, isDark ? 0.055 : 0.07)
+      drawBrainLayer(-0.25, 0.20, 1.0,  isDark ? 0.10  : 0.13)
+      drawBrainLayer(0.20,  1.0,  1.35, isDark ? 0.18  : 0.23)
+
+      // ── Hemisphere fissure (longitudinal groove) ──────────────────────
+      {
+        const fissurePts: { x: number; y: number; z: number }[] = []
+        for (let phi = 0; phi <= Math.PI; phi += Math.PI / 28) {
+          fissurePts.push(project(spherePt(0, phi), R, cx, cy))
+        }
+        ctx.save()
+        ctx.beginPath()
+        for (let i = 0; i < fissurePts.length; i++) {
+          const { x, y } = fissurePts[i]
+          i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y)
+        }
+        ctx.strokeStyle = isDark ? 'rgba(180,150,140,0.12)' : 'rgba(100,70,60,0.14)'
+        ctx.lineWidth = 0.8
+        ctx.setLineDash([2.5, 3])
+        ctx.stroke()
+        ctx.restore()
+      }
+
+      // ── Project skill points ──────────────────────────────────────────
+      const sp = skillPts.map((p, i) => ({ ...project(p, R, cx, cy), skill: SKILLS[i], idx: i }))
+
+      // ── Category connection lines ──────────────────────────────────────
+      for (const [ai, bi] of connPairs) {
+        const a = sp[ai], b = sp[bi]
+        const avgZ = (a.z + b.z) / 2
+        if (avgZ < -0.5) continue
+        const alpha = Math.max(0, (avgZ + 0.5) / 1.5) * 0.45
+        const [r, g, bl2] = hexRgb(SKILLS[ai].color)
+        ctx.beginPath()
+        ctx.moveTo(a.x, a.y)
+        ctx.lineTo(b.x, b.y)
+        ctx.strokeStyle = `rgba(${r},${g},${bl2},${alpha})`
+        ctx.lineWidth = 0.9
+        ctx.stroke()
+      }
+
+      // ── Skill nodes (sorted back → front) ────────────────────────────
+      const sortedSp = [...sp].sort((a, b) => a.z - b.z)
+      for (const { x, y, z, skill, idx } of sortedSp) {
+        const depth = Math.max(0, Math.min(1, (z + 1) / 2))
+        const isHov = idx === hovIdx
+        const baseR = skill.interest ? 3.5 * dpr : (3 + skill.level * 1.5) * dpr
+        const nodeR = baseR * (0.55 + depth * 0.45)
+
+        if (skill.interest) {
+          // Dashed outline — "exploring"
+          ctx.save()
+          ctx.beginPath()
+          ctx.arc(x, y, nodeR, 0, TWO_PI)
+          const [r, g, b] = hexRgb(skill.color)
+          ctx.strokeStyle = `rgba(${r},${g},${b},${0.25 + depth * 0.55})`
+          ctx.lineWidth = 1 * dpr
+          ctx.setLineDash([2 * dpr, 3 * dpr])
+          ctx.stroke()
+          ctx.restore()
+        } else {
+          const [r, g, b] = hexRgb(skill.color)
+          const alpha = 0.40 + depth * 0.60
+          // Glow ring for hovered or front nodes
+          if (isHov || depth > 0.7) {
+            ctx.save()
+            ctx.shadowColor = skill.color
+            ctx.shadowBlur = (isHov ? 18 : 10) * dpr * depth
+            ctx.beginPath()
+            ctx.arc(x, y, nodeR, 0, TWO_PI)
+            ctx.fillStyle = `rgba(${r},${g},${b},${alpha})`
+            ctx.fill()
+            ctx.shadowBlur = 0
+            ctx.restore()
+          } else {
+            ctx.beginPath()
+            ctx.arc(x, y, nodeR, 0, TWO_PI)
+            ctx.fillStyle = `rgba(${r},${g},${b},${alpha})`
+            ctx.fill()
+          }
+        }
+
+        // Label: show when front-facing OR hovered
+        if (z > 0.1 || isHov) {
+          const labelAlpha = isHov ? 0.95 : Math.max(0, (z - 0.1) / 0.9) * 0.75
+          const fontSize = Math.round((isHov ? 11 : 9) * dpr)
+          ctx.font = `${isHov ? '600 ' : ''}${fontSize}px system-ui,sans-serif`
+          ctx.textAlign = 'center'
+          ctx.fillStyle = isDark
+            ? `rgba(230,230,230,${labelAlpha})`
+            : `rgba(17,17,17,${labelAlpha})`
+          ctx.fillText(skill.name, x, y - nodeR / dpr - 4)
+
+          // On hover: also show category + level
+          if (isHov) {
+            const stars = skill.interest ? '(exploring)' : '★'.repeat(skill.level) + '☆'.repeat(5 - skill.level)
+            ctx.font = `${Math.round(8.5 * dpr)}px system-ui,sans-serif`
+            ctx.fillStyle = isDark ? 'rgba(200,200,200,0.65)' : 'rgba(80,80,80,0.65)'
+            ctx.fillText(`${skill.category}  ${stars}`, x, y - nodeR / dpr - 4 - 13)
+          }
+        }
+      }
+
+      // ── "Drag to rotate" hint (fades out after first drag) ────────────
+      if (!hasInteracted) {
+        ctx.font = `${Math.round(9.5 * dpr)}px system-ui,sans-serif`
+        ctx.textAlign = 'center'
+        ctx.fillStyle = isDark ? 'rgba(180,180,180,0.30)' : 'rgba(80,80,80,0.25)'
+        ctx.fillText('drag to rotate', cx, H - 10 * dpr)
+      }
+    }
+
+    // ── Animation loop ─────────────────────────────────────────────────────
+    let hasInteracted = false
+    const loop = () => {
+      if (!dragging) {
+        rotY += velY
+        rotX += velX
+        velY = velY * 0.97 + (0.0022 - velY) * 0.008  // settle back to slow auto-rotate
+        velX = velX * 0.96
+        rotX = Math.max(-0.55, Math.min(0.55, rotX))  // clamp tilt
+      }
+      render()
+      rafId = requestAnimationFrame(loop)
+    }
+    loop()
+
+    // ── Input helpers ──────────────────────────────────────────────────────
+    const canvasXY = (clientX: number, clientY: number) => {
+      const rect = canvas.getBoundingClientRect()
+      return [(clientX - rect.left) * dpr, (clientY - rect.top) * dpr] as const
+    }
+
+    const findHover = (cx2: number, cy2: number) => {
+      const W = canvas.width, H = canvas.height
+      const cxc = W / 2, cyc = H / 2
+      const R = Math.min(W, H) * 0.38
+      let best = -1, bestD = 18 * dpr
+      for (let i = 0; i < SKILLS.length; i++) {
+        const { x, y } = project(skillPts[i], R, cxc, cyc)
+        const d = Math.hypot(x - cx2, y - cy2)
+        if (d < bestD) { bestD = d; best = i }
+      }
+      hovIdx = best
+    }
+
+    const onDown = (cx2: number, cy2: number) => {
+      dragging = true
+      dragX = cx2; dragY = cy2
+      velY = 0; velX = 0
+      hasInteracted = true
+    }
+    const onMove = (cx2: number, cy2: number) => {
+      if (dragging) {
+        const dx = cx2 - dragX, dy = cy2 - dragY
+        velY = dx * 0.005; velX = dy * 0.005
+        rotY += dx * 0.005; rotX += dy * 0.005
+        dragX = cx2; dragY = cy2
+      } else {
+        findHover(cx2, cy2)
+      }
+    }
+    const onUp = () => { dragging = false }
+    const onLeave = () => { dragging = false; hovIdx = -1 }
+
+    canvas.addEventListener('mousedown', e => { const [x, y] = canvasXY(e.clientX, e.clientY); onDown(x, y) })
+    canvas.addEventListener('mousemove', e => { const [x, y] = canvasXY(e.clientX, e.clientY); onMove(x, y) })
+    canvas.addEventListener('mouseup', onUp)
+    canvas.addEventListener('mouseleave', onLeave)
+    canvas.addEventListener('touchstart', e => { e.preventDefault(); const t = e.touches[0]; const [x, y] = canvasXY(t.clientX, t.clientY); onDown(x, y) }, { passive: false })
+    canvas.addEventListener('touchmove', e => { e.preventDefault(); const t = e.touches[0]; const [x, y] = canvasXY(t.clientX, t.clientY); onMove(x, y) }, { passive: false })
+    canvas.addEventListener('touchend', onUp)
+
+    cleanup(() => {
+      cancelAnimationFrame(rafId)
+      ro.disconnect()
+    })
   })
 
   return (
     <div>
-      <h2 class="text-2xl font-bold mb-4" style="color:var(--text-1)">
-        Skills
-      </h2>
+      {/* Section heading */}
+      <div class="flex items-start gap-3 mb-2">
+        <h2 class="font-serif-jp text-2xl font-bold" style="color:var(--text-1)">
+          Skills
+        </h2>
+        <span
+          class="text-[9px] tracking-widest mt-1 select-none"
+          style="writing-mode:vertical-rl;text-orientation:mixed;color:var(--text-2);opacity:0.4;letter-spacing:0.2em"
+        >
+          スキル
+        </span>
+      </div>
+      <p class="text-xs mb-5" style="color:var(--text-2)">
+        ドラッグで脳を回転 · ホバーで詳細
+      </p>
+
+      {/* 3D Canvas */}
+      <div
+        class="w-full rounded-2xl overflow-hidden"
+        style="background:var(--bg-surface);border:1px solid var(--border)"
+      >
+        <canvas
+          ref={canvasRef}
+          class="block w-full cursor-grab active:cursor-grabbing touch-none"
+        />
+      </div>
 
       {/* Legend */}
-      <div class="flex flex-wrap gap-3 mb-4">
-        {CONSTELLATIONS.map((c) => (
-          <div key={c.name} class="flex items-center gap-1.5 text-xs">
+      <div class="flex flex-wrap gap-x-5 gap-y-2 mt-5">
+        {LEGEND.map(({ label, color }) => (
+          <div key={label} class="flex items-center gap-1.5">
             <div
-              class="w-2 h-2 rounded-full"
-              style={`background:${c.color}`}
+              class="w-2 h-2 rounded-full flex-shrink-0"
+              style={`background:${color}`}
             />
-            <span style="color:var(--text-2)">{c.name}</span>
-          </div>
-        ))}
-      </div>
-
-      <div
-        id={sceneId}
-        class="relative rounded-xl overflow-hidden"
-        style="background:var(--bg-card);border:1px solid var(--border)"
-      >
-        <svg
-          viewBox={`0 0 ${CANVAS_W} ${CANVAS_H}`}
-          width="100%"
-          style="display:block"
-          onMouseLeave$={() => {
-            hovered.value = null
-          }}
-        >
-          <BrainBackdrop />
-          <BackgroundParticles />
-          <BackgroundStars />
-
-          {/* Constellations */}
-          {CONSTELLATIONS.map((constellation, constellationIndex) => {
-            const { stars, lines, color } = constellation
-            const plotted = stars.map((star, starIndex) => {
-              const p = projectToBrain(star, starIndex, constellationIndex)
-              return {
-                ...star,
-                px: p.x * CANVAS_W,
-                py: p.y * CANVAS_H,
-              }
-            })
-            return (
-              <g
-                key={constellation.name}
-                class="constellation-group"
-                data-float="1"
-                data-ax={String(1.2 + constellationIndex * 0.25)}
-                data-ay={String(1.4 + constellationIndex * 0.25)}
-                data-speed={String(0.42 + constellationIndex * 0.08)}
-                data-phase={String(constellationIndex * 0.9)}
-              >
-                {/* Lines between stars */}
-                {lines.map(([a, b]) => {
-                  const sa = plotted[a]
-                  const sb = plotted[b]
-                  return (
-                    <line
-                      key={`${a}-${b}`}
-                      x1={sa.px}
-                      y1={sa.py}
-                      x2={sb.px}
-                      y2={sb.py}
-                      stroke={color}
-                      stroke-width="0.8"
-                      stroke-opacity="0.4"
-                    />
-                  )
-                })}
-
-                {/* Stars */}
-                {plotted.map((star, starIndex) => {
-                  const r = star.level * 2.5 + 2
-                  const cx = star.px
-                  const cy = star.py
-                  return (
-                    <g
-                      key={star.name}
-                      onMouseEnter$={() => {
-                        hovered.value = {
-                          name: star.name,
-                          level: star.level,
-                          color,
-                          x: cx,
-                          y: cy,
-                        }
-                      }}
-                    >
-                      {/* Glow */}
-                      <circle
-                        class="node-glow"
-                        cx={cx}
-                        cy={cy}
-                        r={r + 4}
-                        fill={color}
-                        fill-opacity="0.16"
-                        style={`animation-duration:${3.8 + starIndex * 0.33}s;animation-delay:-${starIndex * 0.22}s;`}
-                      />
-                      {/* Star */}
-                      <circle
-                        cx={cx}
-                        cy={cy}
-                        r={r}
-                        fill={color}
-                        fill-opacity="0.9"
-                        style="cursor:pointer"
-                      />
-                    </g>
-                  )
-                })}
-              </g>
-            )
-          })}
-
-          {/* Hover label */}
-          {hovered.value && (
-            <StarLabel info={hovered.value} />
-          )}
-        </svg>
-      </div>
-
-      {/* Level legend */}
-      <div class="flex items-center gap-3 mt-3 text-xs" style="color:var(--text-2)">
-        <span>経験レベル:</span>
-        {[1, 2, 3, 4, 5].map((lvl) => (
-          <div key={lvl} class="flex items-center gap-1">
-            <svg width={lvl * 5 + 4} height={lvl * 5 + 4}>
-              <circle
-                cx={(lvl * 5 + 4) / 2}
-                cy={(lvl * 5 + 4) / 2}
-                r={lvl * 2.5 + 2}
-                fill="var(--accent)"
-                fill-opacity="0.8"
-              />
-            </svg>
-            <span>{lvl}</span>
+            <span class="text-xs" style="color:var(--text-2)">
+              {label}
+            </span>
           </div>
         ))}
       </div>
     </div>
-  )
-})
-
-function projectToBrain(star: Star, starIndex: number, constellationIndex: number) {
-  const nx = star.x * 2 - 1 // -1..1
-  const ny = star.y * 2 - 1 // -1..1
-  const side = nx < 0 ? -1 : 1
-  const localX = Math.abs(nx)
-
-  const centerX = side < 0 ? 0.34 : 0.66
-  const x =
-    centerX +
-    (localX - 0.5) * 0.24 +
-    Math.sin((ny + constellationIndex * 0.2) * Math.PI) * 0.03 * side
-
-  const y =
-    0.52 +
-    ny * 0.34 +
-    Math.sin((localX + starIndex * 0.07) * Math.PI * 2) * 0.015
-
-  return {
-    x: clamp(x, 0.08, 0.92),
-    y: clamp(y, 0.08, 0.92),
-  }
-}
-
-function clamp(v: number, min: number, max: number) {
-  return Math.min(max, Math.max(min, v))
-}
-
-const BrainBackdrop = component$(() => {
-  return (
-    <g>
-      <path
-        class="brain-shell"
-        d="M96,200
-           C90,120 145,58 220,66
-           C258,44 312,56 340,92
-           C360,120 364,156 352,190
-           C372,232 360,286 322,318
-           C292,344 244,350 214,332
-           C156,342 108,304 96,248
-           C92,232 92,216 96,200Z"
-        fill-opacity="0.36"
-      />
-      <path
-        class="brain-shell"
-        d="M504,200
-           C510,120 455,58 380,66
-           C342,44 288,56 260,92
-           C240,120 236,156 248,190
-           C228,232 240,286 278,318
-           C308,344 356,350 386,332
-           C444,342 492,304 504,248
-           C508,232 508,216 504,200Z"
-        fill-opacity="0.36"
-      />
-      <path class="brain-midline" d="M300,82 C290,140 290,260 300,322" fill="none" />
-    </g>
-  )
-})
-
-const BackgroundParticles = component$(() => {
-  const particles = [
-    { x: 72, y: 70, r: 1.6, dur: 7.2, delay: 0.0 },
-    { x: 130, y: 300, r: 1.3, dur: 9.1, delay: 0.7 },
-    { x: 180, y: 120, r: 1.1, dur: 8.2, delay: 1.1 },
-    { x: 242, y: 320, r: 1.7, dur: 10.3, delay: 1.8 },
-    { x: 290, y: 58, r: 1.0, dur: 6.8, delay: 2.2 },
-    { x: 338, y: 336, r: 1.5, dur: 8.9, delay: 2.8 },
-    { x: 392, y: 92, r: 1.1, dur: 7.7, delay: 3.1 },
-    { x: 460, y: 294, r: 1.4, dur: 9.6, delay: 3.6 },
-    { x: 520, y: 146, r: 1.2, dur: 8.4, delay: 4.0 },
-  ]
-
-  return (
-    <g>
-      {particles.map((p, i) => (
-        <circle
-          key={i}
-          class="particle"
-          cx={p.x}
-          cy={p.y}
-          r={p.r}
-          data-float="1"
-          data-ax="0"
-          data-ay="2.2"
-          data-speed={String(0.5 + i * 0.06)}
-          data-phase={String(i * 0.7)}
-          style={`animation-duration:${p.dur}s;animation-delay:-${p.delay}s;`}
-        />
-      ))}
-    </g>
-  )
-})
-
-const BackgroundStars = component$(() => {
-  // Static decorative stars using deterministic positions
-  const bgStars = [
-    { cx: 45, cy: 15 }, { cx: 120, cy: 35 }, { cx: 200, cy: 10 },
-    { cx: 310, cy: 20 }, { cx: 400, cy: 8 }, { cx: 490, cy: 30 },
-    { cx: 560, cy: 12 }, { cx: 580, cy: 50 }, { cx: 15, cy: 80 },
-    { cx: 90, cy: 100 }, { cx: 170, cy: 90 }, { cx: 260, cy: 110 },
-    { cx: 350, cy: 85 }, { cx: 440, cy: 105 }, { cx: 530, cy: 95 },
-    { cx: 30, cy: 150 }, { cx: 140, cy: 170 }, { cx: 230, cy: 155 },
-    { cx: 370, cy: 165 }, { cx: 460, cy: 145 }, { cx: 570, cy: 160 },
-    { cx: 60, cy: 220 }, { cx: 190, cy: 240 }, { cx: 280, cy: 210 },
-    { cx: 410, cy: 230 }, { cx: 510, cy: 215 }, { cx: 590, cy: 245 },
-    { cx: 25, cy: 290 }, { cx: 110, cy: 310 }, { cx: 220, cy: 300 },
-    { cx: 330, cy: 285 }, { cx: 480, cy: 305 }, { cx: 560, cy: 290 },
-    { cx: 70, cy: 360 }, { cx: 160, cy: 375 }, { cx: 270, cy: 355 },
-    { cx: 395, cy: 370 }, { cx: 495, cy: 360 }, { cx: 580, cy: 380 },
-  ]
-
-  return (
-    <g>
-      {bgStars.map((s) => (
-        <circle
-          key={`${s.cx}-${s.cy}`}
-          cx={s.cx}
-          cy={s.cy}
-          r="0.7"
-          fill="#e8f0e9"
-          fill-opacity="0.25"
-        />
-      ))}
-    </g>
-  )
-})
-
-const StarLabel = component$<{ info: HoverInfo }>((props) => {
-  const { name, level, color, x, y } = props.info
-  const textX = x + 12
-  const textY = y - 4
-
-  return (
-    <g>
-      <rect
-        x={textX - 4}
-        y={textY - 14}
-        width={name.length * 7 + 56}
-        height={20}
-        rx="4"
-        fill="#0a0f0d"
-        fill-opacity="0.9"
-        stroke={color}
-        stroke-width="0.5"
-      />
-      <text
-        x={textX}
-        y={textY}
-        font-size="11"
-        fill={color}
-        font-family="system-ui, sans-serif"
-        font-weight="600"
-      >
-        {name}
-      </text>
-      <text
-        x={textX + name.length * 7 + 4}
-        y={textY}
-        font-size="10"
-        fill="var(--text-2)"
-        font-family="system-ui, sans-serif"
-      >
-        Lv.{level}
-      </text>
-    </g>
   )
 })
