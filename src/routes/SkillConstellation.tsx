@@ -28,6 +28,25 @@ export const SkillConstellation = component$(() => {
     .particle {
       fill: var(--accent);
       opacity: 0.14;
+      transform-box: fill-box;
+      transform-origin: center;
+      animation-name: particle-float;
+      animation-timing-function: ease-in-out;
+      animation-iteration-count: infinite;
+    }
+    @keyframes particle-float {
+      0% {
+        opacity: 0.08;
+        transform: translateY(0px) scale(1);
+      }
+      50% {
+        opacity: 0.24;
+        transform: translateY(-10px) scale(1.08);
+      }
+      100% {
+        opacity: 0.08;
+        transform: translateY(0px) scale(1);
+      }
     }
   `)
   const hovered = useSignal<HoverInfo | null>(null)
@@ -230,37 +249,28 @@ const BrainBackdrop = component$(() => {
 
 const BackgroundParticles = component$(() => {
   const particles = [
-    { x: 72, y: 70, r: 1.6, dur: 7.2, dy: -8 },
-    { x: 130, y: 300, r: 1.3, dur: 9.1, dy: -10 },
-    { x: 180, y: 120, r: 1.1, dur: 8.2, dy: -7 },
-    { x: 242, y: 320, r: 1.7, dur: 10.3, dy: -12 },
-    { x: 290, y: 58, r: 1.0, dur: 6.8, dy: -6 },
-    { x: 338, y: 336, r: 1.5, dur: 8.9, dy: -10 },
-    { x: 392, y: 92, r: 1.1, dur: 7.7, dy: -8 },
-    { x: 460, y: 294, r: 1.4, dur: 9.6, dy: -9 },
-    { x: 520, y: 146, r: 1.2, dur: 8.4, dy: -7 },
+    { x: 72, y: 70, r: 1.6, dur: 7.2, delay: 0.0 },
+    { x: 130, y: 300, r: 1.3, dur: 9.1, delay: 0.7 },
+    { x: 180, y: 120, r: 1.1, dur: 8.2, delay: 1.1 },
+    { x: 242, y: 320, r: 1.7, dur: 10.3, delay: 1.8 },
+    { x: 290, y: 58, r: 1.0, dur: 6.8, delay: 2.2 },
+    { x: 338, y: 336, r: 1.5, dur: 8.9, delay: 2.8 },
+    { x: 392, y: 92, r: 1.1, dur: 7.7, delay: 3.1 },
+    { x: 460, y: 294, r: 1.4, dur: 9.6, delay: 3.6 },
+    { x: 520, y: 146, r: 1.2, dur: 8.4, delay: 4.0 },
   ]
 
   return (
     <g>
       {particles.map((p, i) => (
-        <circle key={i} class="particle" cx={p.x} cy={p.y} r={p.r}>
-          <animate
-            attributeName="opacity"
-            values="0.08;0.22;0.08"
-            dur={`${p.dur}s`}
-            begin={`${i * 0.45}s`}
-            repeatCount="indefinite"
-          />
-          <animateTransform
-            attributeName="transform"
-            type="translate"
-            values={`0 0;0 ${p.dy};0 0`}
-            dur={`${p.dur}s`}
-            begin={`${i * 0.45}s`}
-            repeatCount="indefinite"
-          />
-        </circle>
+        <circle
+          key={i}
+          class="particle"
+          cx={p.x}
+          cy={p.y}
+          r={p.r}
+          style={`animation-duration:${p.dur}s;animation-delay:-${p.delay}s;`}
+        />
       ))}
     </g>
   )
