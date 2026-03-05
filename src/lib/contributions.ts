@@ -64,12 +64,12 @@ export function scoreToLevel(total: number): number {
 }
 
 export const LEVEL_COLORS = [
-  '#1c2620', // 0: empty
-  '#0e4f4f', // 1: very light teal
-  '#0f766e', // 2: light teal
-  '#0d9488', // 3: medium teal
-  '#14b8a6', // 4: bright teal
-  '#22d3ee', // 5: accent
+  'var(--heatmap-l0)', // 0: empty
+  'var(--heatmap-l1)', // 1
+  'var(--heatmap-l2)', // 2
+  'var(--heatmap-l3)', // 3
+  'var(--heatmap-l4)', // 4
+  'var(--heatmap-l5)', // 5
 ]
 
 /**
