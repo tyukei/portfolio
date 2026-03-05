@@ -50,15 +50,15 @@ const ContactRow = component$<{ item: ContactItem }>((props) => {
 
   return (
     <div
-      class="flex items-center justify-between gap-4 py-4"
+      class="flex items-center justify-between gap-4 py-4 px-3 -mx-3 rounded-lg transition-colors duration-150 hover:bg-[var(--bg-surface)]"
       style="border-bottom:1px solid var(--border)"
     >
       <div class="flex items-center gap-3">
-        <div class={`${item.icon} w-5 h-5`} style="color:var(--text-1)" />
-        <span class="text-base font-medium" style="color:var(--text-1)">
+        <div class={`${item.icon} w-4 h-4`} style="color:var(--text-1)" />
+        <span class="text-sm font-medium" style="color:var(--text-1)">
           {item.name}
         </span>
-        <span class="text-sm" style="color:var(--text-2)">
+        <span class="text-xs" style="color:var(--text-2)">
           ({SPEED_LABEL[item.speed]})
         </span>
       </div>
@@ -69,21 +69,21 @@ const ContactRow = component$<{ item: ContactItem }>((props) => {
             href={item.url}
             target="_blank"
             rel="noopener noreferrer"
-            class="flex items-center gap-1.5 text-sm font-medium transition-colors hover:text-[var(--accent)]"
+            class="flex items-center gap-1.5 text-xs transition-opacity hover:opacity-40"
             style="color:var(--text-2)"
           >
             {item.id}
-            <div class="i-tabler:external-link w-4 h-4" />
+            <div class="i-tabler:arrow-up-right w-3.5 h-3.5" />
           </a>
         ) : item.copy ? (
           <button
             type="button"
             onClick$={() => navigator.clipboard.writeText(item.copy!)}
-            class="flex items-center gap-1.5 text-sm font-medium transition-colors hover:text-[var(--accent)] cursor-pointer"
+            class="flex items-center gap-1.5 text-xs transition-opacity hover:opacity-40 cursor-pointer"
             style="color:var(--text-2);background:transparent;border:none;padding:0"
           >
             {item.copy}
-            <div class="i-tabler:copy w-4 h-4" />
+            <div class="i-tabler:copy w-3.5 h-3.5" />
           </button>
         ) : null}
       </div>
@@ -93,15 +93,73 @@ const ContactRow = component$<{ item: ContactItem }>((props) => {
 
 export const Contact = component$(() => {
   return (
-    <section class="py-12 px-4 md:px-8 mt-4">
+    <section class="py-24 px-6 md:px-12" style="border-top:1px solid var(--border)">
       <div class="max-w-5xl mx-auto">
-        <h2 class="text-2xl font-bold mb-6" style="color:var(--text-1)">
-          Contact
-        </h2>
-        <div class="flex flex-col max-w-2xl">
-          {CONTACTS.map((item) => (
-            <ContactRow key={item.name} item={item} />
-          ))}
+
+        {/* Two-column layout on desktop */}
+        <div class="flex flex-col lg:flex-row gap-16 lg:gap-24">
+
+          {/* Left column: Contact links */}
+          <div class="flex-1 max-w-md">
+            <div class="flex items-start gap-3 mb-8">
+              <h2 class="font-serif-jp text-2xl font-bold" style="color:var(--text-1)">
+                Contact
+              </h2>
+              <span
+                class="text-[9px] tracking-widest mt-1 select-none"
+                style="writing-mode:vertical-rl;text-orientation:mixed;color:var(--text-2);opacity:0.4;letter-spacing:0.2em"
+              >
+                お問い合わせ
+              </span>
+            </div>
+            <div class="flex flex-col">
+              {CONTACTS.map((item) => (
+                <ContactRow key={item.name} item={item} />
+              ))}
+            </div>
+          </div>
+
+          {/* Right column: Google Form */}
+          <div class="flex-1">
+            <h2 class="font-serif-jp text-2xl font-bold mb-3" style="color:var(--text-1)">
+              お問い合わせフォーム
+            </h2>
+            <p class="text-sm mb-6" style="color:var(--text-2)">
+              ご依頼・ご相談・登壇オファーなどお気軽にどうぞ。
+            </p>
+
+            {/* Google Form iframe — color-scheme:light で白背景固定 */}
+            <div
+              class="w-full rounded-xl overflow-hidden"
+              style="border:1px solid var(--border)"
+            >
+              <iframe
+                src="https://docs.google.com/forms/d/e/1FAIpQLSfdEG1xBEndfKyPQhqGUvHq0tv_lUWj7CNU-DRn7Fi-OJk9rQ/viewform?embedded=true"
+                width="100%"
+                height="820"
+                style="display:block;border:none;color-scheme:light"
+                title="お問い合わせフォーム"
+                loading="lazy"
+              >
+                Loading…
+              </iframe>
+            </div>
+
+            <p class="text-xs mt-3" style="color:var(--text-2);opacity:0.5">
+              フォームが表示されない場合は{' '}
+              <a
+                href="https://docs.google.com/forms/d/e/1FAIpQLSfdEG1xBEndfKyPQhqGUvHq0tv_lUWj7CNU-DRn7Fi-OJk9rQ/viewform"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="underline underline-offset-4 transition-opacity hover:opacity-40"
+                style="color:var(--text-1)"
+              >
+                こちら
+              </a>
+              {' '}から直接開けます。
+            </p>
+          </div>
+
         </div>
       </div>
     </section>
