@@ -14,91 +14,93 @@ export const onGet: RequestHandler = async ({ cacheControl }) => {
 }
 
 export default component$(() => {
-  const isDark = useSignal(true)
+  const isDark = useSignal(false)
 
   useVisibleTask$(() => {
     const saved = localStorage.getItem('theme')
-    if (saved === 'light') {
-      isDark.value = false
-      document.documentElement.classList.add('light')
+    if (saved === 'dark') {
+      isDark.value = true
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
     }
   })
 
   return (
     <>
-      {/* Nav */}
+      {/* Nav — minimal, fixed */}
       <nav
-        class="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 md:px-8 h-12"
+        class="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-6 md:px-12 h-14"
         style="background:var(--bg-base);border-bottom:1px solid var(--border)"
       >
         <Link
           href="/"
-          class="text-sm font-bold tracking-wide"
-          style="color:var(--accent)"
+          class="text-xs font-bold tracking-widest uppercase"
+          style="color:var(--text-1);letter-spacing:0.18em"
         >
           tyukei
         </Link>
 
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-6">
           <Link
             href="/now"
-            class="text-sm transition-opacity hover:opacity-70"
-            style="color:var(--text-2)"
+            class="text-xs tracking-widest uppercase transition-opacity hover:opacity-40"
+            style="color:var(--text-2);letter-spacing:0.14em"
           >
             /now
           </Link>
 
-          {/* Theme toggle */}
           <button
             type="button"
             aria-label="Toggle theme"
-            class="w-8 h-8 flex items-center justify-center rounded-md transition-colors hover:opacity-70"
+            class="w-7 h-7 flex items-center justify-center transition-opacity hover:opacity-40"
             style="color:var(--text-2)"
             onClick$={() => {
               isDark.value = !isDark.value
               if (isDark.value) {
-                document.documentElement.classList.remove('light')
+                document.documentElement.classList.add('dark')
                 localStorage.setItem('theme', 'dark')
               } else {
-                document.documentElement.classList.add('light')
+                document.documentElement.classList.remove('dark')
                 localStorage.setItem('theme', 'light')
               }
             }}
           >
             {isDark.value ? (
-              <div class="i-tabler:sun w-5 h-5" />
+              <div class="i-tabler:sun w-4 h-4" />
             ) : (
-              <div class="i-tabler:moon w-5 h-5" />
+              <div class="i-tabler:moon w-4 h-4" />
             )}
           </button>
         </div>
       </nav>
 
-      {/* Main content — push down by nav height */}
-      <main class="pt-12">
+      <main class="pt-14">
         <Slot />
       </main>
 
       {/* Footer */}
       <footer
-        class="text-center py-6 text-xs"
-        style="color:var(--text-2);border-top:1px solid var(--border)"
+        class="text-center py-12 text-xs tracking-widest uppercase"
+        style="color:var(--text-2);border-top:1px solid var(--border);letter-spacing:0.16em"
       >
-        © 2024 Keita Nakata. Built with{' '}
+        © 2024 Keita Nakata · Built with{' '}
         <a
           href="https://qwik.dev"
           target="_blank"
           rel="noopener noreferrer"
-          style="color:var(--accent)"
+          class="underline underline-offset-4 transition-opacity hover:opacity-40"
+          style="color:var(--text-1)"
         >
           Qwik
-        </a>{' '}
-        +{' '}
+        </a>
+        {' '}+{' '}
         <a
           href="https://unocss.dev"
           target="_blank"
           rel="noopener noreferrer"
-          style="color:var(--accent)"
+          class="underline underline-offset-4 transition-opacity hover:opacity-40"
+          style="color:var(--text-1)"
         >
           UnoCSS
         </a>

@@ -6,10 +6,10 @@ const Row = component$<{ icon: string }>((props) => {
   return (
     <li class="flex items-start gap-3">
       <div
-        class={`${props.icon} w-5 h-5 mt-0.5 flex-shrink-0`}
-        style="color:var(--accent)"
+        class={`${props.icon} w-4 h-4 mt-0.5 flex-shrink-0`}
+        style="color:var(--text-2)"
       />
-      <span style="color:var(--text-1)">
+      <span class="text-sm" style="color:var(--text-1)">
         <Slot />
       </span>
     </li>
@@ -19,9 +19,22 @@ const Row = component$<{ icon: string }>((props) => {
 export const About = component$(() => {
   return (
     <div>
-      <h2 class="text-2xl font-bold mb-4" style="color:var(--text-1)">
-        About
-      </h2>
+      {/* Heading with vertical writing decoration */}
+      <div class="flex items-start gap-3 mb-5">
+        <h2
+          class="font-serif-jp text-xl font-bold"
+          style="color:var(--text-1)"
+        >
+          About
+        </h2>
+        <span
+          class="text-[9px] tracking-widest mt-1 select-none"
+          style="writing-mode:vertical-rl;text-orientation:mixed;color:var(--text-2);opacity:0.4;letter-spacing:0.22em"
+        >
+          アバウト
+        </span>
+      </div>
+
       <ul class="flex flex-col gap-3">
         <Row icon="i-tabler:user">Keita Nakata / 中田 継太</Row>
         <Row icon="i-tabler:cake">

@@ -19,38 +19,47 @@ const RepoCard = component$<{ repo: Repository; last: boolean }>((props) => {
       class="block group"
     >
       <div
-        class="py-3 transition-opacity group-hover:opacity-70"
+        class="py-4 px-3 -mx-3 rounded-lg transition-colors duration-200 group-hover:bg-[var(--bg-surface)]"
         style={props.last ? '' : 'border-bottom:1px solid var(--border)'}
       >
         <div class="flex items-start justify-between gap-3">
-          <div class="min-w-0">
-            <div class="text-sm font-medium leading-snug" style="color:var(--text-1)">
-              {repo.full_name}
+          <div class="min-w-0 flex-1">
+            <div class="flex items-start gap-2 flex-wrap">
+              <div class="text-sm font-medium leading-snug" style="color:var(--text-1)">
+                {repo.full_name}
+              </div>
+              <div
+                class="px-1.5 py-0.5 rounded text-xs font-medium whitespace-nowrap"
+                style="background:var(--bg-card);color:var(--text-2);border:1px solid var(--border)"
+              >
+                {repo.owner}
+              </div>
             </div>
             {repo.description && (
               <div class="text-xs mt-1 leading-relaxed" style="color:var(--text-2)">
                 {repo.description}
               </div>
             )}
+            <div class="flex items-center gap-3 mt-2 text-xs" style="color:var(--text-2)">
+              {repo.language && <span>{repo.language}</span>}
+              <span class="flex items-center gap-1">
+                <span>★</span>
+                <span>{repo.stargazers_count}</span>
+              </span>
+              <span class="flex items-center gap-1">
+                <span>⑂</span>
+                <span>{repo.forks_count}</span>
+              </span>
+              {pushed && <span>更新: {pushed}</span>}
+            </div>
           </div>
-          <div
-            class="px-1.5 py-0.5 rounded text-xs font-medium whitespace-nowrap"
-            style="background:var(--bg-surface);color:var(--text-2);border:1px solid var(--border)"
+          {/* Arrow slides right on hover */}
+          <span
+            class="flex-shrink-0 text-base transition-transform duration-300 ease-out group-hover:translate-x-1 mt-0.5"
+            style="color:var(--text-2)"
           >
-            {repo.owner}
-          </div>
-        </div>
-        <div class="flex items-center gap-3 mt-2 text-xs" style="color:var(--text-2)">
-          {repo.language && <span>{repo.language}</span>}
-          <span class="flex items-center gap-1">
-            <span>★</span>
-            <span>{repo.stargazers_count}</span>
+            →
           </span>
-          <span class="flex items-center gap-1">
-            <span>⑂</span>
-            <span>{repo.forks_count}</span>
-          </span>
-          {pushed && <span>更新: {pushed}</span>}
         </div>
       </div>
     </a>
@@ -61,19 +70,28 @@ export const Repositories = component$<{ repositories: Repository[] }>((props) =
   const repositories = props.repositories.slice(0, 3)
   return (
     <div>
-      <div class="flex items-center justify-between mb-2">
-        <h2 class="text-2xl font-bold" style="color:var(--text-1)">
-          Repositories
-        </h2>
+      <div class="flex items-center justify-between mb-4">
+        {/* Serif heading with vertical writing accent */}
+        <div class="flex items-start gap-2">
+          <h2 class="font-serif-jp text-2xl font-bold" style="color:var(--text-1)">
+            Repositories
+          </h2>
+          <span
+            class="text-[9px] tracking-widest mt-1 select-none"
+            style="writing-mode:vertical-rl;text-orientation:mixed;color:var(--text-2);opacity:0.4;letter-spacing:0.2em"
+          >
+            リポジトリ
+          </span>
+        </div>
         <a
           href="https://github.com/tyukei?tab=repositories"
           target="_blank"
           rel="noopener noreferrer"
-          class="text-xs flex items-center gap-1 transition-opacity hover:opacity-70"
-          style="color:var(--accent)"
+          class="text-xs flex items-center gap-1 tracking-wider uppercase transition-opacity hover:opacity-40"
+          style="color:var(--text-2);letter-spacing:0.12em"
         >
-          GitHub でみる
-          <div class="i-tabler:external-link w-3 h-3" />
+          GitHub
+          <div class="i-tabler:arrow-up-right w-3 h-3" />
         </a>
       </div>
 
