@@ -34,6 +34,46 @@ export const SkillConstellation = component$(() => {
       animation-timing-function: ease-in-out;
       animation-iteration-count: infinite;
     }
+    .constellation-group {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation-name: constellation-drift;
+      animation-timing-function: ease-in-out;
+      animation-iteration-count: infinite;
+    }
+    .node-glow {
+      animation-name: node-pulse;
+      animation-timing-function: ease-in-out;
+      animation-iteration-count: infinite;
+    }
+    @keyframes constellation-drift {
+      0% {
+        transform: translate(0px, 0px);
+      }
+      25% {
+        transform: translate(2px, -2px);
+      }
+      50% {
+        transform: translate(0px, -3px);
+      }
+      75% {
+        transform: translate(-2px, -1px);
+      }
+      100% {
+        transform: translate(0px, 0px);
+      }
+    }
+    @keyframes node-pulse {
+      0% {
+        opacity: 0.10;
+      }
+      50% {
+        opacity: 0.28;
+      }
+      100% {
+        opacity: 0.10;
+      }
+    }
     @keyframes particle-float {
       0% {
         opacity: 0.08;
@@ -98,7 +138,11 @@ export const SkillConstellation = component$(() => {
               }
             })
             return (
-              <g key={constellation.name}>
+              <g
+                key={constellation.name}
+                class="constellation-group"
+                style={`animation-duration:${11 + constellationIndex * 1.7}s;animation-delay:-${constellationIndex * 1.1}s;`}
+              >
                 {/* Lines between stars */}
                 {lines.map(([a, b]) => {
                   const sa = plotted[a]
@@ -118,7 +162,7 @@ export const SkillConstellation = component$(() => {
                 })}
 
                 {/* Stars */}
-                {plotted.map((star) => {
+                {plotted.map((star, starIndex) => {
                   const r = star.level * 2.5 + 2
                   const cx = star.px
                   const cy = star.py
@@ -137,11 +181,13 @@ export const SkillConstellation = component$(() => {
                     >
                       {/* Glow */}
                       <circle
+                        class="node-glow"
                         cx={cx}
                         cy={cy}
                         r={r + 4}
                         fill={color}
-                        fill-opacity="0.15"
+                        fill-opacity="0.16"
+                        style={`animation-duration:${3.8 + starIndex * 0.33}s;animation-delay:-${starIndex * 0.22}s;`}
                       />
                       {/* Star */}
                       <circle
