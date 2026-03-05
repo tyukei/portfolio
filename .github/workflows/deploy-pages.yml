@@ -37,6 +37,7 @@ jobs:
 
       - name: Build
         env:
+          BASE_PATH: ${{ vars.SITE_ORIGIN != '' && '/' || format('/{0}/', github.event.repository.name) }}
           SITE_ORIGIN: ${{ vars.SITE_ORIGIN != '' && vars.SITE_ORIGIN || format('https://{0}.github.io/{1}', github.repository_owner, github.event.repository.name) }}
           GITHUB_TOKEN: ${{ secrets.PORTFOLIO_GITHUB_TOKEN }}
           PORTFOLIO_TOKEN_TYUKEI: ${{ secrets.PORTFOLIO_TOKEN_TYUKEI }}
