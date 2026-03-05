@@ -37,13 +37,24 @@ jobs:
 
       - name: Build
         env:
-          BASE_PATH: ${{ vars.BASE_PATH }}
           SITE_ORIGIN: ${{ vars.SITE_ORIGIN != '' && vars.SITE_ORIGIN || format('https://{0}.github.io/{1}', github.repository_owner, github.event.repository.name) }}
           GITHUB_TOKEN: ${{ secrets.PORTFOLIO_GITHUB_TOKEN }}
           PORTFOLIO_TOKEN_TYUKEI: ${{ secrets.PORTFOLIO_TOKEN_TYUKEI }}
           PORTFOLIO_TOKEN_CHUKEI2: ${{ secrets.PORTFOLIO_TOKEN_CHUKEI2 }}
           CONNPASS_API_KEY: ${{ secrets.CONNPASS_API_KEY }}
         run: bun run build
+
+      - name: Debug built base
+        run: |
+          if [ -f "dist/index.html" ]; then
+            echo "Built at dist/"
+            grep -o 'q:base="[^"]*"' dist/index.html || true
+            grep -o 'href="/[^"]*"' dist/index.html | head -n 10 || true
+          elif [ -f "dist/portfolio/index.html" ]; then
+            echo "Built at dist/portfolio/"
+            grep -o 'q:base="[^"]*"' dist/portfolio/index.html || true
+            grep -o 'href="/[^"]*"' dist/portfolio/index.html | head -n 10 || true
+          fi
 
       - name: Detect artifact path
         id: artifact-path
