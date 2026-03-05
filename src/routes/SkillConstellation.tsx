@@ -1,4 +1,4 @@
-import { component$, useSignal, useStylesScoped$ } from '@builder.io/qwik'
+import { component$, useSignal, useStylesScoped$, useVisibleTask$ } from '@builder.io/qwik'
 import { CONSTELLATIONS, type Star } from '~/data/skills'
 
 const CANVAS_W = 600
@@ -90,6 +90,33 @@ export const SkillConstellation = component$(() => {
     }
   `)
   const hovered = useSignal<HoverInfo | null>(null)
+  const sceneId = 'skills-brain-scene'
+
+  useVisibleTask$(({ cleanup }) => {
+    const root = document.getElementById(sceneId)
+    if (!root) return
+
+    const floats = Array.from(root.querySelectorAll<SVGGraphicsElement>('[data-float]'))
+    let raf = 0
+    const start = performance.now()
+
+    const loop = (now: number) => {
+      const t = (now - start) / 1000
+      for (const el of floats) {
+        const ax = Number.parseFloat(el.dataset.ax ?? '0')
+        const ay = Number.parseFloat(el.dataset.ay ?? '0')
+        const speed = Number.parseFloat(el.dataset.speed ?? '1')
+        const phase = Number.parseFloat(el.dataset.phase ?? '0')
+        const x = Math.sin(t * speed + phase) * ax
+        const y = Math.cos(t * speed * 0.85 + phase) * ay
+        el.style.transform = `translate(${x}px, ${y}px)`
+      }
+      raf = requestAnimationFrame(loop)
+    }
+
+    raf = requestAnimationFrame(loop)
+    cleanup(() => cancelAnimationFrame(raf))
+  })
 
   return (
     <div>
@@ -111,6 +138,7 @@ export const SkillConstellation = component$(() => {
       </div>
 
       <div
+        id={sceneId}
         class="relative rounded-xl overflow-hidden"
         style="background:var(--bg-card);border:1px solid var(--border)"
       >
@@ -141,7 +169,11 @@ export const SkillConstellation = component$(() => {
               <g
                 key={constellation.name}
                 class="constellation-group"
-                style={`animation-duration:${11 + constellationIndex * 1.7}s;animation-delay:-${constellationIndex * 1.1}s;`}
+                data-float="1"
+                data-ax={String(1.2 + constellationIndex * 0.25)}
+                data-ay={String(1.4 + constellationIndex * 0.25)}
+                data-speed={String(0.42 + constellationIndex * 0.08)}
+                data-phase={String(constellationIndex * 0.9)}
               >
                 {/* Lines between stars */}
                 {lines.map(([a, b]) => {
@@ -315,6 +347,11 @@ const BackgroundParticles = component$(() => {
           cx={p.x}
           cy={p.y}
           r={p.r}
+          data-float="1"
+          data-ax="0"
+          data-ay="2.2"
+          data-speed={String(0.5 + i * 0.06)}
+          data-phase={String(i * 0.7)}
           style={`animation-duration:${p.dur}s;animation-delay:-${p.delay}s;`}
         />
       ))}
