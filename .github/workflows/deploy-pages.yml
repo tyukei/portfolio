@@ -37,12 +37,22 @@ jobs:
 
       - name: Build
         env:
-          BASE_PATH: /portfolio/
+          BASE_PATH: ${{ vars.BASE_PATH }}
+          SITE_ORIGIN: ${{ vars.SITE_ORIGIN != '' && vars.SITE_ORIGIN || format('https://{0}.github.io/{1}', github.repository_owner, github.event.repository.name) }}
           GITHUB_TOKEN: ${{ secrets.PORTFOLIO_GITHUB_TOKEN }}
           PORTFOLIO_TOKEN_TYUKEI: ${{ secrets.PORTFOLIO_TOKEN_TYUKEI }}
           PORTFOLIO_TOKEN_CHUKEI2: ${{ secrets.PORTFOLIO_TOKEN_CHUKEI2 }}
           CONNPASS_API_KEY: ${{ secrets.CONNPASS_API_KEY }}
         run: bun run build
+
+      - name: Detect artifact path
+        id: artifact-path
+        run: |
+          if [ -d "dist/portfolio" ]; then
+            echo "path=dist/portfolio" >> "$GITHUB_OUTPUT"
+          else
+            echo "path=dist" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -50,7 +60,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./dist/portfolio
+          path: ${{ steps.artifact-path.outputs.path }}
 
   deploy:
     environment:

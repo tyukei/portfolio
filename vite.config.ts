@@ -24,6 +24,16 @@ function detectPagesBasePath(): string {
     return normalizeBasePath(process.env.BASE_PATH)
   }
 
+  // Prefer explicit origin path when provided (works for custom domains too).
+  if (process.env.SITE_ORIGIN) {
+    try {
+      const path = new URL(process.env.SITE_ORIGIN).pathname
+      return normalizeBasePath(path || '/')
+    } catch {
+      // ignore invalid URL and fall through
+    }
+  }
+
   if (process.env.GITHUB_ACTIONS === 'true') {
     const repo = process.env.GITHUB_REPOSITORY?.split('/')[1]
     if (repo) return normalizeBasePath(repo)
