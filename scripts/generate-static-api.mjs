@@ -13,10 +13,11 @@ const START_YEAR = 2020
 await loadDotEnv()
 await mkdir(join(PUBLIC_API_DIR, 'heatmap'), { recursive: true })
 
-const [articles, events, talks, zennByDate, connpassByDate] = await Promise.all([
+const [articles, events, talks, repositories, zennByDate, connpassByDate] = await Promise.all([
   fetchArticles(),
   fetchEvents(),
   fetchTalks(),
+  fetchRepositories(),
   fetchZennByDate(ZENN_USER),
   fetchConnpassByDate(['tyukei', 'chukei']),
 ])
@@ -35,6 +36,11 @@ await writeJsonPreferNonEmpty(
   join(PUBLIC_API_DIR, 'talks.json'),
   { talks },
   (v) => Array.isArray(v?.talks) && v.talks.length > 0,
+)
+await writeJsonPreferNonEmpty(
+  join(PUBLIC_API_DIR, 'repositories.json'),
+  { repositories },
+  (v) => Array.isArray(v?.repositories) && v.repositories.length > 0,
 )
 
 const speakerDeckByDate = talksToByDate(talks)
@@ -216,6 +222,21 @@ async function fetchTalks() {
   })
   if (!xml) return []
   return parseSpeakerDeckAtom(xml)
+}
+
+async function fetchRepositories() {
+  const merged = new Map()
+  for (const username of GITHUB_USERS) {
+    const tokens = resolveGithubTokensForUser(username)
+    const repos = await fetchGitHubRepos(username, tokens)
+    for (const repo of repos) {
+      merged.set(repo.full_name, repo)
+    }
+  }
+
+  return [...merged.values()]
+    .sort((a, b) => b.pushed_at.localeCompare(a.pushed_at))
+    .slice(0, 20)
 }
 
 function parseSpeakerDeckAtom(xml) {
@@ -460,6 +481,38 @@ async function fetchGitHubPublicByDate(username, year) {
     if (count > 0) out[date] = count
   }
   return out
+}
+
+async function fetchGitHubRepos(username, tokens) {
+  const headers = { 'User-Agent': 'portfolio-site/1.0' }
+  if (tokens[0]) headers.Authorization = `Bearer ${tokens[0]}`
+  const all = []
+
+  for (let page = 1; page <= 2; page++) {
+    const data = await fetchJson(
+      `https://api.github.com/users/${username}/repos?type=owner&sort=pushed&direction=desc&per_page=100&page=${page}`,
+      { headers },
+    )
+    if (!Array.isArray(data) || data.length === 0) break
+
+    for (const repo of data) {
+      if (repo?.private || repo?.fork || repo?.archived) continue
+      if (!repo?.full_name || !repo?.html_url || !repo?.pushed_at) continue
+      all.push({
+        name: repo.name ?? '',
+        full_name: repo.full_name,
+        html_url: repo.html_url,
+        description: repo.description ?? null,
+        language: repo.language ?? null,
+        stargazers_count: Number(repo.stargazers_count ?? 0),
+        forks_count: Number(repo.forks_count ?? 0),
+        pushed_at: repo.pushed_at,
+        owner: repo?.owner?.login ?? username,
+      })
+    }
+  }
+
+  return all
 }
 
 function mergeHeatmapByDate({

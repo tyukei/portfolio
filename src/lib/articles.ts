@@ -22,3 +22,15 @@ export interface Talk {
   date: string | null
   thumbnail: string | null
 }
+
+export interface Repository {
+  name: string
+  full_name: string
+  html_url: string
+  description: string | null
+  language: string | null
+  stargazers_count: number
+  forks_count: number
+  pushed_at: string
+  owner: string
+}

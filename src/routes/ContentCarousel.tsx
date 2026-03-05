@@ -5,24 +5,25 @@ import {
     useVisibleTask$,
     $,
 } from '@builder.io/qwik'
-import type { ConnpassEvent, Talk, ZennArticle } from '~/lib/articles'
-import { About } from './About'
+import type { ConnpassEvent, Repository, Talk, ZennArticle } from '~/lib/articles'
 import { Articles } from './Articles'
 import { Events } from './Events'
+import { Repositories } from './Repositories'
 import { Talks } from './Talks'
 
 /**
  * 2 items visible per step (on md: screens).
- *   0 → About     | Articles
- *   1 → Articles  | Events
- *   2 → Events    | Talks
- *   3 → Talks     | About (clone)
- *   4 → About (c) | Articles (c)  → snap back to 0
+ *   0 → Articles      | Events
+ *   1 → Events        | Talks
+ *   2 → Talks         | Repositories
+ *   3 → Repositories  | Articles (clone)
+ *   4 → Articles (c)  | Events (c)  → snap back to 0
  */
 export const ContentCarousel = component$<{
     articles: ZennArticle[]
     events: ConnpassEvent[]
     talks: Talk[]
+    repositories: Repository[]
 }>((props) => {
     useStylesScoped$(`
     .carousel-track {
@@ -150,9 +151,6 @@ export const ContentCarousel = component$<{
                                 : 'transition: none'
                             }`}
                     >
-                        <div class="carousel-item px-5" key="about">
-                            <About />
-                        </div>
                         <div class="carousel-item px-5" key="articles">
                             <Articles articles={props.articles} />
                         </div>
@@ -162,11 +160,14 @@ export const ContentCarousel = component$<{
                         <div class="carousel-item px-5" key="talks">
                             <Talks talks={props.talks} />
                         </div>
-                        <div class="carousel-item px-5" key="about-c">
-                            <About />
+                        <div class="carousel-item px-5" key="repositories">
+                            <Repositories repositories={props.repositories} />
                         </div>
                         <div class="carousel-item px-5" key="articles-c">
                             <Articles articles={props.articles} />
+                        </div>
+                        <div class="carousel-item px-5" key="events-c">
+                            <Events events={props.events} />
                         </div>
                     </div>
                 </div>

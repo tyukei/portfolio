@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { component$ } from '@builder.io/qwik'
 import { type DocumentHead, routeLoader$ } from '@builder.io/qwik-city'
-import type { ConnpassEvent, Talk, ZennArticle } from '~/lib/articles'
+import type { ConnpassEvent, Repository, Talk, ZennArticle } from '~/lib/articles'
 import type { ContributionData } from '~/lib/contributions'
 import { Contact } from './Contact'
 import { ContentCarousel } from './ContentCarousel'
@@ -14,6 +14,7 @@ interface StaticPortfolioData {
   articles: ZennArticle[]
   events: ConnpassEvent[]
   talks: Talk[]
+  repositories: Repository[]
   contributionsByYear: Record<number, ContributionData>
   selectedYear: number
 }
@@ -52,10 +53,11 @@ export const useStaticPortfolioData = routeLoader$(async ({ url }) => {
       ? yearRaw
       : CURRENT_YEAR
 
-  const [articlesJson, eventsJson, talksJson] = await Promise.all([
+  const [articlesJson, eventsJson, talksJson, repositoriesJson] = await Promise.all([
     readJsonFile<{ articles?: ZennArticle[] }>(join(staticApiDir, 'articles.json')),
     readJsonFile<{ events?: ConnpassEvent[] }>(join(staticApiDir, 'events.json')),
     readJsonFile<{ talks?: Talk[] }>(join(staticApiDir, 'talks.json')),
+    readJsonFile<{ repositories?: Repository[] }>(join(staticApiDir, 'repositories.json')),
   ])
 
   const contributionsByYear: Record<number, ContributionData> = {}
@@ -72,6 +74,7 @@ export const useStaticPortfolioData = routeLoader$(async ({ url }) => {
     articles: articlesJson?.articles ?? [],
     events: eventsJson?.events ?? [],
     talks: talksJson?.talks ?? [],
+    repositories: repositoriesJson?.repositories ?? [],
     contributionsByYear,
     selectedYear,
   } satisfies StaticPortfolioData
@@ -86,11 +89,12 @@ export default component$(() => {
       <ProfileCard />
 
       <section class="max-w-5xl mx-auto px-4 md:px-8 pt-4 pb-12 flex flex-col gap-10">
-        {/* Row 1: Carousel — About / Articles / Events / Talks */}
+        {/* Row 1: Carousel — Articles / Events / Talks / Repositories */}
         <ContentCarousel
           articles={data.value.articles}
           events={data.value.events}
           talks={data.value.talks}
+          repositories={data.value.repositories}
         />
 
         {/* Row 2: 草グラフ — full width */}

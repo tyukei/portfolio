@@ -1,4 +1,5 @@
 import { component$ } from '@builder.io/qwik'
+import { About } from './About'
 
 interface SocialLink {
   icon: string
@@ -40,50 +41,53 @@ export const ProfileCard = component$(() => {
       class="w-full pt-8 pb-4 px-4 md:px-8"
       style="background:var(--bg-base)"
     >
-      <div class="max-w-5xl mx-auto flex flex-col sm:flex-row items-center sm:items-start gap-6">
-        {/* Avatar */}
-        <img
-          src="https://github.com/tyukei.png"
-          alt="Keita Nakata"
-          width="80"
-          height="80"
-          class="rounded-full flex-shrink-0"
-          style="border:2px solid var(--accent)"
-        />
+      <div class="max-w-5xl mx-auto flex flex-col md:flex-row md:items-start md:justify-between gap-8">
+        <div class="flex items-center sm:items-start gap-6">
+          <img
+            src="https://github.com/tyukei.png"
+            alt="Keita Nakata"
+            width="80"
+            height="80"
+            class="rounded-full flex-shrink-0"
+            style="border:2px solid var(--accent)"
+          />
 
-        {/* Profile info */}
-        <div class="flex flex-col items-center sm:items-start gap-2 text-center sm:text-left">
-          <div class="flex flex-wrap items-baseline gap-2 justify-center sm:justify-start">
-            <h1 class="text-2xl font-bold" style="color:var(--text-1)">
-              Keita Nakata
-            </h1>
-            <span class="text-base" style="color:var(--text-2)">
-              @tyukei
-            </span>
+          <div class="flex flex-col items-start gap-2 text-left">
+            <div class="flex flex-wrap items-baseline gap-2">
+              <h1 class="text-2xl font-bold" style="color:var(--text-1)">
+                Keita Nakata
+              </h1>
+              <span class="text-base" style="color:var(--text-2)">
+                @tyukei
+              </span>
+            </div>
+
+            <p class="text-sm" style="color:var(--text-2)">
+              沖縄のしがないデータエンジニアでござる
+            </p>
+
+            <div class="flex items-center gap-3 mt-1">
+              {SOCIAL_LINKS.map((link) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={link.label}
+                  class="transition-opacity hover:opacity-70"
+                >
+                  <div class={`${link.icon} w-5 h-5`} style="color:var(--text-2)" />
+                </a>
+              ))}
+            </div>
           </div>
+        </div>
 
-          <p class="text-sm" style="color:var(--text-2)">
-            沖縄のしがないデータエンジニアでござる
-          </p>
-
-          {/* Social links */}
-          <div class="flex items-center gap-3 mt-1">
-            {SOCIAL_LINKS.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={link.label}
-                class="transition-opacity hover:opacity-70"
-              >
-                <div
-                  class={`${link.icon} w-5 h-5`}
-                  style="color:var(--text-2)"
-                />
-              </a>
-            ))}
-          </div>
+        <div
+          class="w-full md:w-[360px] rounded-xl p-4"
+          style="background:var(--bg-surface);border:1px solid var(--border)"
+        >
+          <About />
         </div>
       </div>
     </section>
