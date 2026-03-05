@@ -1,4 +1,4 @@
-import { component$, useSignal } from '@builder.io/qwik'
+import { component$, useSignal, useStylesScoped$ } from '@builder.io/qwik'
 import { CONSTELLATIONS, type Star } from '~/data/skills'
 
 const CANVAS_W = 600
@@ -13,6 +13,23 @@ interface HoverInfo {
 }
 
 export const SkillConstellation = component$(() => {
+  useStylesScoped$(`
+    .brain-shell {
+      fill: var(--bg-surface);
+      stroke: var(--border);
+      stroke-width: 1.2;
+    }
+    .brain-midline {
+      stroke: var(--border);
+      stroke-width: 1;
+      stroke-dasharray: 3 3;
+      opacity: 0.8;
+    }
+    .particle {
+      fill: var(--accent);
+      opacity: 0.14;
+    }
+  `)
   const hovered = useSignal<HoverInfo | null>(null)
 
   return (
@@ -46,25 +63,34 @@ export const SkillConstellation = component$(() => {
             hovered.value = null
           }}
         >
-          {/* Background stars (decorative) */}
+          <BrainBackdrop />
+          <BackgroundParticles />
           <BackgroundStars />
 
           {/* Constellations */}
-          {CONSTELLATIONS.map((constellation) => {
+          {CONSTELLATIONS.map((constellation, constellationIndex) => {
             const { stars, lines, color } = constellation
+            const plotted = stars.map((star, starIndex) => {
+              const p = projectToBrain(star, starIndex, constellationIndex)
+              return {
+                ...star,
+                px: p.x * CANVAS_W,
+                py: p.y * CANVAS_H,
+              }
+            })
             return (
               <g key={constellation.name}>
                 {/* Lines between stars */}
                 {lines.map(([a, b]) => {
-                  const sa = stars[a]
-                  const sb = stars[b]
+                  const sa = plotted[a]
+                  const sb = plotted[b]
                   return (
                     <line
                       key={`${a}-${b}`}
-                      x1={sa.x * CANVAS_W}
-                      y1={sa.y * CANVAS_H}
-                      x2={sb.x * CANVAS_W}
-                      y2={sb.y * CANVAS_H}
+                      x1={sa.px}
+                      y1={sa.py}
+                      x2={sb.px}
+                      y2={sb.py}
                       stroke={color}
                       stroke-width="0.8"
                       stroke-opacity="0.4"
@@ -73,10 +99,10 @@ export const SkillConstellation = component$(() => {
                 })}
 
                 {/* Stars */}
-                {stars.map((star) => {
+                {plotted.map((star) => {
                   const r = star.level * 2.5 + 2
-                  const cx = star.x * CANVAS_W
-                  const cy = star.y * CANVAS_H
+                  const cx = star.px
+                  const cy = star.py
                   return (
                     <g
                       key={star.name}
@@ -140,6 +166,103 @@ export const SkillConstellation = component$(() => {
         ))}
       </div>
     </div>
+  )
+})
+
+function projectToBrain(star: Star, starIndex: number, constellationIndex: number) {
+  const nx = star.x * 2 - 1 // -1..1
+  const ny = star.y * 2 - 1 // -1..1
+  const side = nx < 0 ? -1 : 1
+  const localX = Math.abs(nx)
+
+  const centerX = side < 0 ? 0.34 : 0.66
+  const x =
+    centerX +
+    (localX - 0.5) * 0.24 +
+    Math.sin((ny + constellationIndex * 0.2) * Math.PI) * 0.03 * side
+
+  const y =
+    0.52 +
+    ny * 0.34 +
+    Math.sin((localX + starIndex * 0.07) * Math.PI * 2) * 0.015
+
+  return {
+    x: clamp(x, 0.08, 0.92),
+    y: clamp(y, 0.08, 0.92),
+  }
+}
+
+function clamp(v: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, v))
+}
+
+const BrainBackdrop = component$(() => {
+  return (
+    <g>
+      <path
+        class="brain-shell"
+        d="M96,200
+           C90,120 145,58 220,66
+           C258,44 312,56 340,92
+           C360,120 364,156 352,190
+           C372,232 360,286 322,318
+           C292,344 244,350 214,332
+           C156,342 108,304 96,248
+           C92,232 92,216 96,200Z"
+        fill-opacity="0.36"
+      />
+      <path
+        class="brain-shell"
+        d="M504,200
+           C510,120 455,58 380,66
+           C342,44 288,56 260,92
+           C240,120 236,156 248,190
+           C228,232 240,286 278,318
+           C308,344 356,350 386,332
+           C444,342 492,304 504,248
+           C508,232 508,216 504,200Z"
+        fill-opacity="0.36"
+      />
+      <path class="brain-midline" d="M300,82 C290,140 290,260 300,322" fill="none" />
+    </g>
+  )
+})
+
+const BackgroundParticles = component$(() => {
+  const particles = [
+    { x: 72, y: 70, r: 1.6, dur: 7.2, dy: -8 },
+    { x: 130, y: 300, r: 1.3, dur: 9.1, dy: -10 },
+    { x: 180, y: 120, r: 1.1, dur: 8.2, dy: -7 },
+    { x: 242, y: 320, r: 1.7, dur: 10.3, dy: -12 },
+    { x: 290, y: 58, r: 1.0, dur: 6.8, dy: -6 },
+    { x: 338, y: 336, r: 1.5, dur: 8.9, dy: -10 },
+    { x: 392, y: 92, r: 1.1, dur: 7.7, dy: -8 },
+    { x: 460, y: 294, r: 1.4, dur: 9.6, dy: -9 },
+    { x: 520, y: 146, r: 1.2, dur: 8.4, dy: -7 },
+  ]
+
+  return (
+    <g>
+      {particles.map((p, i) => (
+        <circle key={i} class="particle" cx={p.x} cy={p.y} r={p.r}>
+          <animate
+            attributeName="opacity"
+            values="0.08;0.22;0.08"
+            dur={`${p.dur}s`}
+            begin={`${i * 0.45}s`}
+            repeatCount="indefinite"
+          />
+          <animateTransform
+            attributeName="transform"
+            type="translate"
+            values={`0 0;0 ${p.dy};0 0`}
+            dur={`${p.dur}s`}
+            begin={`${i * 0.45}s`}
+            repeatCount="indefinite"
+          />
+        </circle>
+      ))}
+    </g>
   )
 })
 
