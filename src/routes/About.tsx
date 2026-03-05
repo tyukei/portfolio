@@ -44,30 +44,28 @@ export const About = component$(() => {
           y/o{' '}
           <script
             dangerouslySetInnerHTML={`(() => {
-  if (window.__liveAgeTimer) return;
-  const YEAR = 1000 * 60 * 60 * 24 * 365.24219;
+  if (window.__liveAgeRaf) return;
+  const YEAR_MS = 365.24219 * 24 * 3600 * 1000;
+  // Combine Date.now() epoch with performance.now() delta for sub-ms precision
+  const t0ms = Date.now();
+  const t0perf = performance.now();
+  const now = () => t0ms + (performance.now() - t0perf);
   const renderAge = () => {
     const elements = document.querySelectorAll('.live-age');
-    if (!elements.length) return;
     for (const el of elements) {
       const birth = Number(el.getAttribute('data-birth'));
       if (!Number.isFinite(birth)) continue;
-      const age = (Date.now() - birth) / YEAR;
+      const age = (now() - birth) / YEAR_MS;
       const intPart = Math.floor(age);
-      const fracPart = (Math.floor((age % 1) * 1_000_000_000) / 1_000_000_000)
-        .toString()
-        .slice(2)
-        .padEnd(9, '0');
-      el.textContent = \`\${intPart}.\${fracPart}\`;
+      const frac = (age % 1).toFixed(9).slice(2);
+      el.textContent = \`\${intPart}.\${frac}\`;
     }
+    window.__liveAgeRaf = requestAnimationFrame(renderAge);
   };
-  renderAge();
-  window.__liveAgeTimer = window.setInterval(renderAge, 250);
+  window.__liveAgeRaf = requestAnimationFrame(renderAge);
   window.addEventListener('pagehide', () => {
-    if (window.__liveAgeTimer) {
-      window.clearInterval(window.__liveAgeTimer);
-      window.__liveAgeTimer = 0;
-    }
+    cancelAnimationFrame(window.__liveAgeRaf);
+    window.__liveAgeRaf = 0;
   }, { once: true });
 })();`}
           />
