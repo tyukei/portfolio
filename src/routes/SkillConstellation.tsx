@@ -13,52 +13,93 @@ interface Skill {
 }
 
 const SKILLS: Skill[] = [
-  // Data Engineering ─ upper-front-left
-  { name: 'Python',      category: 'Data Engineering', color: '#22d3ee', level: 5, theta: 0.38, phi: 0.88 },
-  { name: 'BigQuery',    category: 'Data Engineering', color: '#22d3ee', level: 4, theta: 0.72, phi: 1.05 },
-  { name: 'SQL',         category: 'Data Engineering', color: '#22d3ee', level: 4, theta: 0.18, phi: 1.22 },
-  { name: 'dbt',         category: 'Data Engineering', color: '#22d3ee', level: 3, theta: 0.52, phi: 1.38 },
-  { name: 'Pandas',      category: 'Data Engineering', color: '#22d3ee', level: 4, theta: 0.88, phi: 0.92 },
-  // AI / LLM ─ upper-front-center
-  { name: 'LLM Agent',   category: 'AI / LLM',         color: '#a78bfa', level: 4, theta: 1.22, phi: 0.64 },
-  { name: 'MCP',         category: 'AI / LLM',         color: '#a78bfa', level: 3, theta: 1.52, phi: 0.76 },
-  { name: 'PyTorch',     category: 'AI / LLM',         color: '#a78bfa', level: 3, theta: 1.35, phi: 1.05 },
-  { name: 'Prompt Eng.', category: 'AI / LLM',         color: '#a78bfa', level: 4, theta: 1.68, phi: 0.88 },
-  // Frontend ─ right hemisphere
-  { name: 'TypeScript',  category: 'Frontend',          color: '#34d399', level: 4, theta: 2.02, phi: 0.82 },
-  { name: 'Qwik',        category: 'Frontend',          color: '#34d399', level: 3, theta: 2.36, phi: 0.96 },
-  { name: 'React',       category: 'Frontend',          color: '#34d399', level: 3, theta: 2.18, phi: 1.18 },
-  { name: 'UnoCSS',      category: 'Frontend',          color: '#34d399', level: 3, theta: 2.54, phi: 1.28 },
-  // Cloud ─ back-right
-  { name: 'GCP',         category: 'Cloud',             color: '#f59e0b', level: 4, theta: 3.42, phi: 1.06 },
-  { name: 'Cloud Run',   category: 'Cloud',             color: '#f59e0b', level: 3, theta: 3.74, phi: 1.28 },
-  { name: 'Terraform',   category: 'Cloud',             color: '#f59e0b', level: 2, theta: 3.22, phi: 1.48 },
-  { name: 'Pub/Sub',     category: 'Cloud',             color: '#f59e0b', level: 3, theta: 3.58, phi: 0.90 },
-  // Backend ─ back-left
-  { name: 'FastAPI',     category: 'Backend',           color: '#60a5fa', level: 4, theta: 4.48, phi: 1.18 },
-  { name: 'Node.js',     category: 'Backend',           color: '#60a5fa', level: 3, theta: 4.82, phi: 1.38 },
-  { name: 'PostgreSQL',  category: 'Backend',           color: '#60a5fa', level: 3, theta: 4.28, phi: 1.46 },
-  { name: 'Redis',       category: 'Backend',           color: '#60a5fa', level: 2, theta: 5.02, phi: 1.28 },
-  // DevOps ─ left hemisphere
-  { name: 'Docker',      category: 'DevOps',            color: '#fb7185', level: 4, theta: 5.52, phi: 0.92 },
-  { name: 'GH Actions',  category: 'DevOps',            color: '#fb7185', level: 3, theta: 5.80, phi: 1.12 },
-  { name: 'Linux',       category: 'DevOps',            color: '#fb7185', level: 3, theta: 5.66, phi: 1.38 },
+  // Data Engineering ─ upper-front-left (theta 0.2-1.0, phi 0.8-1.4)
+  { name: 'Python', category: 'Data Engineering', color: '#22d3ee', level: 5, theta: 0.38, phi: 0.88 },
+  { name: 'BigQuery', category: 'Data Engineering', color: '#22d3ee', level: 4, theta: 0.72, phi: 1.05 },
+  { name: 'SQL', category: 'Data Engineering', color: '#22d3ee', level: 4, theta: 0.18, phi: 1.22 },
+  { name: 'dbt', category: 'Data Engineering', color: '#22d3ee', level: 3, theta: 0.52, phi: 1.38 },
+  { name: 'Pandas', category: 'Data Engineering', color: '#22d3ee', level: 4, theta: 0.88, phi: 0.92 },
+  { name: 'MATLAB', category: 'Data Engineering', color: '#22d3ee', level: 2, theta: 0.32, phi: 1.45 },
+
+  // AI / LLM ─ upper-front-center (theta 1.1-1.8, phi 0.6-1.1)
+  { name: 'LLM Agent', category: 'AI / LLM', color: '#a78bfa', level: 4, theta: 1.22, phi: 0.64 },
+  { name: 'MCP', category: 'AI / LLM', color: '#a78bfa', level: 3, theta: 1.52, phi: 0.76 },
+  { name: 'PyTorch', category: 'AI / LLM', color: '#a78bfa', level: 3, theta: 1.35, phi: 1.05 },
+  { name: 'Prompt Eng.', category: 'AI / LLM', color: '#a78bfa', level: 4, theta: 1.68, phi: 0.88 },
+  { name: 'TensorFlow', category: 'AI / LLM', color: '#a78bfa', level: 3, theta: 1.15, phi: 0.85 },
+  { name: 'OpenCV', category: 'AI / LLM', color: '#a78bfa', level: 2, theta: 1.48, phi: 1.20 },
+
+  // Frontend ─ right hemisphere (theta 1.9-2.8, phi 0.8-1.5)
+  { name: 'TypeScript', category: 'Frontend', color: '#34d399', level: 4, theta: 2.02, phi: 0.82 },
+  { name: 'Qwik', category: 'Frontend', color: '#34d399', level: 3, theta: 2.36, phi: 0.96 },
+  { name: 'React', category: 'Frontend', color: '#34d399', level: 3, theta: 2.18, phi: 1.18 },
+  { name: 'UnoCSS', category: 'Frontend', color: '#34d399', level: 3, theta: 2.54, phi: 1.28 },
+  { name: 'HTML5', category: 'Frontend', color: '#34d399', level: 5, theta: 1.95, phi: 1.05 },
+  { name: 'CSS3', category: 'Frontend', color: '#34d399', level: 4, theta: 2.72, phi: 1.12 },
+  { name: 'JavaScript', category: 'Frontend', color: '#34d399', level: 5, theta: 2.25, phi: 1.45 },
+  { name: 'Tailwind', category: 'Frontend', color: '#34d399', level: 4, theta: 2.85, phi: 0.88 },
+  { name: 'Figma', category: 'Frontend', color: '#34d399', level: 3, theta: 1.88, phi: 1.35 },
+  { name: 'Jekyll', category: 'Frontend', color: '#34d399', level: 2, theta: 2.65, phi: 1.50 },
+
+  // Cloud ─ back-right (theta 3.1-3.9, phi 0.8-1.5)
+  { name: 'GCP', category: 'Cloud', color: '#f59e0b', level: 4, theta: 3.42, phi: 1.06 },
+  { name: 'Cloud Run', category: 'Cloud', color: '#f59e0b', level: 3, theta: 3.74, phi: 1.28 },
+  { name: 'Terraform', category: 'Cloud', color: '#f59e0b', level: 2, theta: 3.22, phi: 1.48 },
+  { name: 'Pub/Sub', category: 'Cloud', color: '#f59e0b', level: 3, theta: 3.58, phi: 0.90 },
+  { name: 'Firebase', category: 'Cloud', color: '#f59e0b', level: 4, theta: 3.15, phi: 0.85 },
+  { name: 'Heroku', category: 'Cloud', color: '#f59e0b', level: 3, theta: 3.88, phi: 1.02 },
+  { name: 'IFTTT', category: 'Cloud', color: '#f59e0b', level: 2, theta: 3.35, phi: 1.25 },
+
+  // Backend ─ back-left (theta 4.1-5.1, phi 1.0-1.6)
+  { name: 'FastAPI', category: 'Backend', color: '#60a5fa', level: 4, theta: 4.48, phi: 1.18 },
+  { name: 'Node.js', category: 'Backend', color: '#60a5fa', level: 3, theta: 4.82, phi: 1.38 },
+  { name: 'PostgreSQL', category: 'Backend', color: '#60a5fa', level: 3, theta: 4.28, phi: 1.46 },
+  { name: 'Redis', category: 'Backend', color: '#60a5fa', level: 2, theta: 5.02, phi: 1.28 },
+  { name: 'Django', category: 'Backend', color: '#60a5fa', level: 3, theta: 4.15, phi: 1.10 },
+  { name: 'Flask', category: 'Backend', color: '#60a5fa', level: 3, theta: 4.65, phi: 0.98 },
+  { name: 'Java', category: 'Backend', color: '#60a5fa', level: 3, theta: 4.95, phi: 1.05 },
+  { name: 'MySQL', category: 'Backend', color: '#60a5fa', level: 4, theta: 4.35, phi: 1.62 },
+  { name: 'PHP', category: 'Backend', color: '#60a5fa', level: 3, theta: 4.75, phi: 1.58 },
+
+  // DevOps ─ left hemisphere (theta 5.4-6.0, phi 0.8-1.5)
+  { name: 'Docker', category: 'DevOps', color: '#fb7185', level: 4, theta: 5.52, phi: 0.92 },
+  { name: 'GH Actions', category: 'DevOps', color: '#fb7185', level: 3, theta: 5.80, phi: 1.12 },
+  { name: 'Linux', category: 'DevOps', color: '#fb7185', level: 3, theta: 5.66, phi: 1.38 },
+  { name: 'Git', category: 'DevOps', color: '#fb7185', level: 4, theta: 5.95, phi: 0.95 },
+  { name: 'Nginx', category: 'DevOps', color: '#fb7185', level: 3, theta: 5.45, phi: 1.25 },
+
+  // Mobile ─ new category (lower front) (theta 1.0-2.5, phi 1.8-2.4)
+  { name: 'Android', category: 'Mobile', color: '#eab308', level: 3, theta: 1.45, phi: 2.05 },
+  { name: 'Flutter', category: 'Mobile', color: '#eab308', level: 4, theta: 1.85, phi: 1.92 },
+  { name: 'Kotlin', category: 'Mobile', color: '#eab308', level: 3, theta: 1.22, phi: 2.25 },
+  { name: 'Swift', category: 'Mobile', color: '#eab308', level: 2, theta: 2.15, phi: 2.18 },
+
+  // Game / Embedded ─ new category (lower back) (theta 3.5-5.0, phi 1.8-2.4)
+  { name: 'Arduino', category: 'Game / Embedded', color: '#14b8a6', level: 2, theta: 3.85, phi: 2.15 },
+  { name: 'C', category: 'Game / Embedded', color: '#14b8a6', level: 3, theta: 4.55, phi: 2.05 },
+  { name: 'C++', category: 'Game / Embedded', color: '#14b8a6', level: 3, theta: 4.25, phi: 1.85 },
+  { name: 'C#', category: 'Game / Embedded', color: '#14b8a6', level: 3, theta: 4.88, phi: 1.95 },
+  { name: 'Unity', category: 'Game / Embedded', color: '#14b8a6', level: 3, theta: 4.15, phi: 2.25 },
+
   // Interests / Exploring ─ scattered near poles
-  { name: 'Rust',        category: 'Exploring',         color: '#d1a76a', level: 2, theta: 0.95, phi: 0.46, interest: true },
-  { name: 'Go',          category: 'Exploring',         color: '#d1a76a', level: 1, theta: 2.82, phi: 0.42, interest: true },
-  { name: 'Kafka',       category: 'Exploring',         color: '#d1a76a', level: 2, theta: 4.06, phi: 0.50, interest: true },
-  { name: 'WebGL',       category: 'Exploring',         color: '#d1a76a', level: 1, theta: 1.78, phi: 0.30, interest: true },
-  { name: 'Iceberg',     category: 'Exploring',         color: '#d1a76a', level: 2, theta: 3.88, phi: 0.36, interest: true },
+  { name: 'Rust', category: 'Exploring', color: '#d1a76a', level: 2, theta: 0.95, phi: 0.46, interest: true },
+  { name: 'Go', category: 'Exploring', color: '#d1a76a', level: 1, theta: 2.82, phi: 0.42, interest: true },
+  { name: 'Kafka', category: 'Exploring', color: '#d1a76a', level: 2, theta: 4.06, phi: 0.50, interest: true },
+  { name: 'WebGL', category: 'Exploring', color: '#d1a76a', level: 1, theta: 1.78, phi: 0.30, interest: true },
+  { name: 'Iceberg', category: 'Exploring', color: '#d1a76a', level: 2, theta: 3.88, phi: 0.36, interest: true },
+  { name: 'Illustrator', category: 'Exploring', color: '#d1a76a', level: 2, theta: 5.25, phi: 0.45, interest: true },
 ]
 
 const LEGEND = [
   { label: 'Data Engineering', color: '#22d3ee' },
-  { label: 'AI / LLM',         color: '#a78bfa' },
-  { label: 'Frontend',          color: '#34d399' },
-  { label: 'Cloud',             color: '#f59e0b' },
-  { label: 'Backend',           color: '#60a5fa' },
-  { label: 'DevOps',            color: '#fb7185' },
-  { label: 'Exploring',         color: '#d1a76a' },
+  { label: 'AI / LLM', color: '#a78bfa' },
+  { label: 'Frontend', color: '#34d399' },
+  { label: 'Cloud', color: '#f59e0b' },
+  { label: 'Backend', color: '#60a5fa' },
+  { label: 'DevOps', color: '#fb7185' },
+  { label: 'Mobile', color: '#eab308' },
+  { label: 'Game / Embedded', color: '#14b8a6' },
+  { label: 'Exploring', color: '#d1a76a' },
 ]
 
 // ─── 3D Math ───────────────────────────────────────────────────────────────────
@@ -190,9 +231,9 @@ export const SkillConstellation = component$(() => {
 
       // ── Sphere background glow ─────────────────────────────────────────
       const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 1.05)
-      grd.addColorStop(0,   isDark ? 'rgba(40,40,40,0.40)' : 'rgba(245,240,235,0.60)')
+      grd.addColorStop(0, isDark ? 'rgba(40,40,40,0.40)' : 'rgba(245,240,235,0.60)')
       grd.addColorStop(0.8, isDark ? 'rgba(25,25,25,0.20)' : 'rgba(240,235,228,0.30)')
-      grd.addColorStop(1,   'rgba(0,0,0,0)')
+      grd.addColorStop(1, 'rgba(0,0,0,0)')
       ctx.beginPath()
       ctx.arc(cx, cy, R * 1.05, 0, TWO_PI)
       ctx.fillStyle = grd
@@ -221,8 +262,8 @@ export const SkillConstellation = component$(() => {
         ctx.fill()
       }
       drawBrainLayer(-1.0, -0.25, 0.75, isDark ? 0.055 : 0.07)
-      drawBrainLayer(-0.25, 0.20, 1.0,  isDark ? 0.10  : 0.13)
-      drawBrainLayer(0.20,  1.0,  1.35, isDark ? 0.18  : 0.23)
+      drawBrainLayer(-0.25, 0.20, 1.0, isDark ? 0.10 : 0.13)
+      drawBrainLayer(0.20, 1.0, 1.35, isDark ? 0.18 : 0.23)
 
       // ── Hemisphere fissure (longitudinal groove) ──────────────────────
       {
