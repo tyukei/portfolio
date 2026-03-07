@@ -150,6 +150,9 @@ function hexRgb(hex: string): [number, number, number] {
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255]
 }
 
+// Rocket Easter Egg node position: +X axis (right equator of sphere)
+const ROCKET_PT: V3 = [1, 0, 0]
+
 // ─── Component ─────────────────────────────────────────────────────────────────
 export const SkillConstellation = component$(() => {
   const canvasRef = useSignal<HTMLCanvasElement>()
@@ -210,6 +213,7 @@ export const SkillConstellation = component$(() => {
     let velY = 0.0022, velX = 0
     let dragging = false, dragX = 0, dragY = 0
     let hovIdx = -1
+    let rocketHov = false
 
     // Project a 3D point to canvas 2D
     const project = (p: V3, R: number, cx: number, cy: number) => {
@@ -371,6 +375,30 @@ export const SkillConstellation = component$(() => {
         ctx.fillStyle = isDark ? 'rgba(180,180,180,0.30)' : 'rgba(80,80,80,0.25)'
         ctx.fillText('drag to rotate', cx, H - 10 * dpr)
       }
+
+      // ── Rocket Easter Egg node ─────────────────────────────────────────
+      {
+        const rp = project(ROCKET_PT, R, cx, cy)
+        const alpha = Math.max(0, (rp.z + 0.15) / 0.55)
+        if (alpha > 0) {
+          const pulse = 0.88 + 0.12 * Math.sin(performance.now() * 0.0034)
+          const emojiSize = Math.round((rocketHov ? 20 : 15) * dpr * (0.5 + Math.max(0, rp.z) * 0.5) * pulse)
+          ctx.save()
+          ctx.globalAlpha = Math.min(1, alpha)
+          ctx.font = `${emojiSize}px serif`
+          ctx.textAlign = 'center'
+          ctx.textBaseline = 'middle'
+          ctx.fillText('🚀', rp.x, rp.y)
+          if (rp.z > 0.3 || rocketHov) {
+            ctx.font = `${Math.round(7.5 * dpr)}px system-ui,sans-serif`
+            ctx.textBaseline = 'alphabetic'
+            ctx.fillStyle = isDark ? 'rgba(255,160,60,0.9)' : 'rgba(200,70,0,0.85)'
+            ctx.globalAlpha = Math.min(1, alpha) * (rocketHov ? 1 : 0.65)
+            ctx.fillText(rocketHov ? 'Click to launch!' : 'Launch?', rp.x, rp.y - emojiSize * 0.65 - 4 * dpr)
+          }
+          ctx.restore()
+        }
+      }
     }
 
     // ── Animation loop ─────────────────────────────────────────────────────
@@ -387,6 +415,216 @@ export const SkillConstellation = component$(() => {
       rafId = requestAnimationFrame(loop)
     }
     loop()
+
+    // ── Rocket Easter Egg animation ────────────────────────────────────────
+    const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v))
+
+    const launchRocket = () => {
+      const OW = window.innerWidth, OH = window.innerHeight
+      const ov = document.createElement('canvas')
+      ov.width = Math.round(OW * dpr)
+      ov.height = Math.round(OH * dpr)
+      ov.style.cssText = `position:fixed;top:0;left:0;width:${OW}px;height:${OH}px;z-index:9999;pointer-events:none`
+      document.body.appendChild(ov)
+      const oc = ov.getContext('2d')!
+      const OWd = ov.width, OHd = ov.height
+
+      // Stars
+      const stars = Array.from({ length: 260 }, () => ({
+        x: Math.random() * OWd,
+        y: Math.random() * OHd,
+        r: (Math.random() * 1.5 + 0.3) * dpr,
+        seed: Math.random() * Math.PI * 2,
+      }))
+
+      // Draw rocket (pointing up, nose at top)
+      const drawRocket = (cx2: number, cy2: number, sz: number) => {
+        if (sz < 1.5) return
+        oc.save()
+        oc.translate(cx2, cy2)
+
+        // Body
+        const bg = oc.createLinearGradient(-sz * 0.35, -sz * 0.6, sz * 0.35, sz * 0.5)
+        bg.addColorStop(0, '#eeeef5')
+        bg.addColorStop(0.5, '#c8c8d8')
+        bg.addColorStop(1, '#909098')
+        oc.beginPath()
+        oc.moveTo(-sz * 0.28, -sz * 0.6)
+        oc.lineTo(-sz * 0.28, sz * 0.35)
+        oc.arc(0, sz * 0.35, sz * 0.28, Math.PI, 0)
+        oc.lineTo(sz * 0.28, -sz * 0.6)
+        oc.closePath()
+        oc.fillStyle = bg
+        oc.fill()
+
+        // Nose cone
+        oc.beginPath()
+        oc.moveTo(-sz * 0.28, -sz * 0.6)
+        oc.quadraticCurveTo(-sz * 0.28, -sz * 1.08, 0, -sz * 1.22)
+        oc.quadraticCurveTo(sz * 0.28, -sz * 1.08, sz * 0.28, -sz * 0.6)
+        oc.closePath()
+        oc.fillStyle = '#cc2222'
+        oc.fill()
+
+        // Porthole
+        const pg = oc.createRadialGradient(-sz * 0.05, -sz * 0.1, sz * 0.01, sz * 0.02, -sz * 0.07, sz * 0.17)
+        pg.addColorStop(0, '#ccecff')
+        pg.addColorStop(1, '#2255aa')
+        oc.beginPath()
+        oc.arc(0, -sz * 0.08, sz * 0.15, 0, Math.PI * 2)
+        oc.fillStyle = pg
+        oc.fill()
+        oc.strokeStyle = 'rgba(80,80,90,0.55)'
+        oc.lineWidth = sz * 0.04
+        oc.stroke()
+
+        // Left fin
+        oc.beginPath()
+        oc.moveTo(-sz * 0.28, sz * 0.12)
+        oc.lineTo(-sz * 0.64, sz * 0.55)
+        oc.lineTo(-sz * 0.28, sz * 0.38)
+        oc.closePath()
+        oc.fillStyle = '#cc2222'
+        oc.fill()
+
+        // Right fin
+        oc.beginPath()
+        oc.moveTo(sz * 0.28, sz * 0.12)
+        oc.lineTo(sz * 0.64, sz * 0.55)
+        oc.lineTo(sz * 0.28, sz * 0.38)
+        oc.closePath()
+        oc.fillStyle = '#cc2222'
+        oc.fill()
+
+        // Exhaust flame
+        if (sz > 4) {
+          const ft = performance.now() * 0.011
+          const fh = sz * (0.52 + Math.sin(ft * 3.3) * 0.10)
+          const fg = oc.createLinearGradient(0, sz * 0.45, 0, sz * 0.45 + fh)
+          fg.addColorStop(0, 'rgba(255,252,80,0.97)')
+          fg.addColorStop(0.32, 'rgba(255,128,0,0.88)')
+          fg.addColorStop(0.72, 'rgba(255,40,0,0.50)')
+          fg.addColorStop(1, 'rgba(255,30,0,0)')
+          oc.beginPath()
+          oc.moveTo(-sz * 0.22, sz * 0.46)
+          oc.quadraticCurveTo(-sz * 0.08, sz * 0.46 + fh * 0.55, 0, sz * 0.46 + fh)
+          oc.quadraticCurveTo(sz * 0.08, sz * 0.46 + fh * 0.55, sz * 0.22, sz * 0.46)
+          oc.closePath()
+          oc.fillStyle = fg
+          oc.fill()
+        }
+
+        oc.restore()
+      }
+
+      // Draw ceiling crack
+      const drawCrack = (progress: number) => {
+        const branch = (x: number, y: number, len: number, angle: number, depth: number) => {
+          if (depth <= 0 || len < 5 * dpr) return
+          const p = Math.min(progress, 1)
+          const ex = x + Math.cos(angle) * len * p
+          const ey = y + Math.sin(angle) * len * p
+          oc.moveTo(x, y)
+          oc.lineTo(ex, ey)
+          if (progress > 0.4) {
+            branch(ex, ey, len * 0.58, angle - 0.42, depth - 1)
+            branch(ex, ey, len * 0.52, angle + 0.55, depth - 1)
+          }
+        }
+        oc.beginPath()
+        oc.strokeStyle = 'rgba(60,40,20,0.72)'
+        oc.lineWidth = 2.2 * dpr
+        branch(OWd / 2, 0, OHd * 0.30, Math.PI * 0.5 + 0.08, 5)
+        branch(OWd / 2, 0, OHd * 0.26, Math.PI * 0.5 - 0.18, 4)
+        branch(OWd / 2 - OWd * 0.09, 0, OHd * 0.19, Math.PI * 0.5 + 0.38, 3)
+        branch(OWd / 2 + OWd * 0.11, 0, OHd * 0.16, Math.PI * 0.5 - 0.44, 3)
+        oc.stroke()
+      }
+
+      // Animation: total 7.5s
+      // t=0→1 over 7500ms
+      // launch  : t 0.00–0.15  (0–1125ms)  rocket rises
+      // crack   : t 0.10–0.22  (750–1650ms) ceiling cracks
+      // space-in: t 0.18–0.30  (1350–2250ms) dark bg fades in
+      // travel  : t 0.27–0.55  (2025–4125ms) rocket shrinks into space
+      // return  : t 0.55–0.85  (4125–6375ms) rocket grows back
+      // flash   : t 0.87–1.00  (6525–7500ms) white flash
+      const TOTAL_MS = 7500
+      const start = performance.now()
+      let ovRaf = 0
+
+      const frame = () => {
+        const now = performance.now()
+        const t = clamp((now - start) / TOTAL_MS, 0, 1)
+        oc.clearRect(0, 0, OWd, OHd)
+
+        const pLaunch = clamp((t - 0.00) / 0.15, 0, 1)
+        const pCrack  = clamp((t - 0.10) / 0.12, 0, 1)
+        const pSpace  = clamp((t - 0.18) / 0.12, 0, 1)
+        const pTravel = clamp((t - 0.27) / 0.28, 0, 1)
+        const pReturn = clamp((t - 0.55) / 0.30, 0, 1)
+        const pFlash  = clamp((t - 0.87) / 0.13, 0, 1)
+
+        // Dark space background
+        if (pSpace > 0) {
+          oc.fillStyle = `rgba(0,0,8,${pSpace * 0.96})`
+          oc.fillRect(0, 0, OWd, OHd)
+        }
+
+        // White flash
+        if (pFlash > 0) {
+          oc.fillStyle = `rgba(255,255,255,${pFlash})`
+          oc.fillRect(0, 0, OWd, OHd)
+        }
+
+        // Stars
+        if (pSpace > 0.15 && pFlash < 0.85) {
+          const starA = clamp((pSpace - 0.15) / 0.35, 0, 1) * (1 - pFlash)
+          for (const s of stars) {
+            const tw = 0.65 + 0.35 * Math.sin(now * 0.002 + s.seed)
+            oc.beginPath()
+            oc.arc(s.x, s.y, s.r, 0, Math.PI * 2)
+            oc.fillStyle = `rgba(255,255,255,${starA * tw})`
+            oc.fill()
+          }
+        }
+
+        // Ceiling crack
+        if (pCrack > 0 && pSpace < 0.92) {
+          drawCrack(pCrack)
+        }
+
+        // Phase 1: rocket launches (rises from bottom, before travel takes over)
+        if (pTravel < 0.04) {
+          const ease = 1 - Math.pow(1 - pLaunch, 2.8)
+          const ry2 = OHd * 0.72 - ease * OHd * 0.88
+          drawRocket(OWd / 2, ry2, 38 * dpr)
+        }
+
+        // Phase 2: space travel (shrinks as it goes up and away)
+        if (pTravel > 0 && pReturn < 0.02) {
+          const easeT = Math.pow(pTravel, 1.7)
+          const ry2 = OHd * 0.04 - easeT * OHd * 0.55
+          const sz = 38 * dpr * (1 - easeT * 0.90)
+          drawRocket(OWd / 2, ry2, sz)
+        }
+
+        // Phase 3: rocket returns (grows from tiny to massive)
+        if (pReturn > 0 && pFlash < 0.45) {
+          const easeR = 1 - Math.pow(1 - pReturn, 2.5)
+          const ry2 = -OHd * 0.55 + easeR * OHd * 1.1
+          const sz = 3 * dpr + easeR * OHd * 0.52
+          drawRocket(OWd / 2, ry2, sz)
+        }
+
+        if (t < 1) {
+          ovRaf = requestAnimationFrame(frame)
+        } else {
+          if (document.body.contains(ov)) document.body.removeChild(ov)
+        }
+      }
+      ovRaf = requestAnimationFrame(frame)
+    }
 
     // ── Input helpers ──────────────────────────────────────────────────────
     const canvasXY = (clientX: number, clientY: number) => {
@@ -413,6 +651,18 @@ export const SkillConstellation = component$(() => {
       velY = 0; velX = 0
       hasInteracted = true
     }
+    // Helper to check if a canvas point is over the rocket node
+    const checkRocketHov = (cx2: number, cy2: number) => {
+      const W2 = canvas.width, H2 = canvas.height
+      const Rr = Math.min(W2, H2) * 0.38
+      const rp = project(ROCKET_PT, Rr, W2 / 2, H2 / 2)
+      const prev = rocketHov
+      rocketHov = rp.z > -0.1 && Math.hypot(rp.x - cx2, rp.y - cy2) < 26 * dpr
+      if (rocketHov !== prev) {
+        canvas.style.cursor = rocketHov ? 'pointer' : ''
+      }
+    }
+
     const onMove = (cx2: number, cy2: number) => {
       if (dragging) {
         const dx = cx2 - dragX, dy = cy2 - dragY
@@ -421,15 +671,24 @@ export const SkillConstellation = component$(() => {
         dragX = cx2; dragY = cy2
       } else {
         findHover(cx2, cy2)
+        checkRocketHov(cx2, cy2)
       }
     }
     const onUp = () => { dragging = false }
-    const onLeave = () => { dragging = false; hovIdx = -1 }
+    const onLeave = () => { dragging = false; hovIdx = -1; rocketHov = false; canvas.style.cursor = '' }
 
     canvas.addEventListener('mousedown', e => { const [x, y] = canvasXY(e.clientX, e.clientY); onDown(x, y) })
     canvas.addEventListener('mousemove', e => { const [x, y] = canvasXY(e.clientX, e.clientY); onMove(x, y) })
     canvas.addEventListener('mouseup', onUp)
     canvas.addEventListener('mouseleave', onLeave)
+    canvas.addEventListener('click', e => {
+      const [cx2, cy2] = canvasXY(e.clientX, e.clientY)
+      const W2 = canvas.width, H2 = canvas.height
+      const rp = project(ROCKET_PT, Math.min(W2, H2) * 0.38, W2 / 2, H2 / 2)
+      if (rp.z > -0.1 && Math.hypot(rp.x - cx2, rp.y - cy2) < 26 * dpr) {
+        launchRocket()
+      }
+    })
     canvas.addEventListener('touchstart', e => { e.preventDefault(); const t = e.touches[0]; const [x, y] = canvasXY(t.clientX, t.clientY); onDown(x, y) }, { passive: false })
     canvas.addEventListener('touchmove', e => { e.preventDefault(); const t = e.touches[0]; const [x, y] = canvasXY(t.clientX, t.clientY); onMove(x, y) }, { passive: false })
     canvas.addEventListener('touchend', onUp)
