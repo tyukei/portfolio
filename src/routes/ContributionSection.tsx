@@ -14,7 +14,7 @@ export const ContributionSection = component$<{
   selectedYear: number
 }>((props) => {
   const selectedYear = props.selectedYear
-  const ACTIVE_STYLE = 'background:var(--accent);color:#000;'
+  const ACTIVE_STYLE = 'background:var(--accent);color:var(--bg-base);'
   const INACTIVE_STYLE =
     'background:transparent;color:var(--text-2);border:1px solid var(--border);'
   const ACTIVE_CLASS = 'bg-[var(--accent)] text-black'
