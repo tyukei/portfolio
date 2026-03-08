@@ -71,17 +71,10 @@ export const Repositories = component$<{ repositories: Repository[] }>((props) =
   return (
     <div>
       <div class="flex items-center justify-between mb-4">
-        {/* Serif heading with vertical writing accent */}
-        <div class="flex items-start gap-2">
+        <div>
           <h2 class="font-serif-jp text-2xl font-bold" style="color:var(--text-1)">
             Repositories
           </h2>
-          <span
-            class="text-[9px] tracking-widest mt-1 select-none"
-            style="writing-mode:vertical-rl;text-orientation:mixed;color:var(--text-2);opacity:0.4;letter-spacing:0.2em"
-          >
-            リポジトリ
-          </span>
         </div>
         <a
           href="https://github.com/tyukei?tab=repositories"

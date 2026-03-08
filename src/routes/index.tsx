@@ -4,7 +4,6 @@ import { component$ } from '@builder.io/qwik'
 import { type DocumentHead, routeLoader$ } from '@builder.io/qwik-city'
 import type { ConnpassEvent, Repository, Talk, ZennArticle } from '~/lib/articles'
 import type { ContributionData } from '~/lib/contributions'
-import { Contact } from './Contact'
 import { ContentCarousel } from './ContentCarousel'
 import { ContributionSection } from './ContributionSection'
 import { Marquee } from './Marquee'
@@ -111,9 +110,6 @@ export default component$(() => {
         {/* Row 3: Skills constellation */}
         <SkillConstellation />
       </section>
-
-      {/* Contact */}
-      <Contact />
     </>
   )
 })

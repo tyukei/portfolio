@@ -33,6 +33,16 @@ const SOCIAL_LINKS: SocialLink[] = [
     href: 'https://x.com/tyukei',
     label: 'X (Twitter)',
   },
+  {
+    icon: 'i-simple-icons:linkedin',
+    href: 'https://www.linkedin.com/in/keita-nakata-96bb9a2a6/',
+    label: 'LinkedIn',
+  },
+  {
+    icon: 'i-simple-icons:discord',
+    href: 'https://discord.gg/xpX8aaagNK',
+    label: 'Discord',
+  },
 ]
 
 // CSS filter states for the avatar "expression" cycling
@@ -145,8 +155,8 @@ export const ProfileCard = component$(() => {
 
         {/* Right: About card */}
         <div
-          class="w-full md:w-[360px] rounded-xl p-6 transition-opacity"
-          style={`background:var(--bg-surface);border:1px solid var(--border);transition-duration:700ms;transition-delay:260ms;opacity:${revealed.value ? '1' : '0'}`}
+          class="w-full md:w-[380px] md:pt-2 transition-opacity"
+          style={`transition-duration:700ms;transition-delay:260ms;opacity:${revealed.value ? '1' : '0'}`}
         >
           <About />
         </div>

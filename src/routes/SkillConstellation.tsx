@@ -12,6 +12,12 @@ interface Skill {
   interest?: boolean   // true = "exploring"  →  dashed outline, smaller
 }
 
+interface NeuralPair {
+  a: number
+  b: number
+  phase: number
+}
+
 const SKILLS: Skill[] = [
   // Data Engineering ─ upper-front-left (theta 0.2-1.0, phi 0.8-1.4)
   { name: 'Python', category: 'Data Engineering', color: '#22d3ee', level: 5, theta: 0.38, phi: 0.88 },
@@ -122,6 +128,36 @@ function spherePt(theta: number, phi: number): V3 {
   ]
 }
 
+function brainSurfaceFromVec(v: V3): V3 {
+  const len = Math.hypot(v[0], v[1], v[2]) || 1
+  const x = v[0] / len
+  const y = v[1] / len
+  const z = v[2] / len
+  const d = brainBump(x, y, z)
+  const nx = x * (1 + d)
+  const ny = y * (1 + d)
+  const nz = z * (1 + d)
+  const nlen = Math.hypot(nx, ny, nz) || 1
+  return [nx / nlen, ny / nlen, nz / nlen]
+}
+
+function brainSurfacePt(theta: number, phi: number): V3 {
+  const [x, y, z] = spherePt(theta, phi)
+  const d = brainBump(x, y, z)
+  const nx = x * (1 + d)
+  const ny = y * (1 + d)
+  const nz = z * (1 + d)
+  const len = Math.sqrt(nx * nx + ny * ny + nz * nz) || 1
+  return [nx / len, ny / len, nz / len]
+}
+
+function dist3(a: V3, b: V3): number {
+  const dx = a[0] - b[0]
+  const dy = a[1] - b[1]
+  const dz = a[2] - b[2]
+  return Math.sqrt(dx * dx + dy * dy + dz * dz)
+}
+
 // Fibonacci sphere — most uniform sampling on a unit sphere
 function fibSphere(n: number): V3[] {
   const out: V3[] = []
@@ -195,6 +231,47 @@ export const SkillConstellation = component$(() => {
     // ── Skill 3D positions ─────────────────────────────────────────────────
     const skillPts: V3[] = SKILLS.map(s => spherePt(s.theta, s.phi))
 
+    // ── Brain contour guide points (3D, rotates with sphere) ──────────────
+    const makeLobeContour = (side: 1 | -1): V3[] => {
+      const out: V3[] = []
+      const steps = 84
+      for (let i = 0; i <= steps; i++) {
+        const u = (i / steps) * TWO_PI
+        const h = Math.cos(u)
+        const v = Math.sin(u)
+
+        // Wider outer arc + slightly pinched medial arc for brain-like hemispheres
+        const xMag =
+          0.50 +
+          0.14 * h +
+          0.09 * (1 - h * h) -
+          0.09 * Math.max(0, -h)
+
+        // Round crown, softer lower edge
+        const y =
+          0.70 * v -
+          0.08 * Math.sin(2 * u) -
+          0.06 -
+          0.05 * Math.max(0, -v)
+
+        // Front/back bulges
+        const z = 0.68 * h + 0.09 * Math.sin(3 * u)
+
+        out.push(brainSurfaceFromVec([side * xMag, y, z]))
+      }
+      return out
+    }
+    const leftLobeContour = makeLobeContour(-1)
+    const rightLobeContour = makeLobeContour(1)
+    const lowerBridgeContour: V3[] = []
+    for (let i = 0; i <= 42; i++) {
+      const t = i / 42
+      const x = -0.34 + t * 0.68
+      const y = -0.74 + Math.sin(t * Math.PI) * 0.07
+      const z = -0.06 + Math.cos(t * Math.PI) * 0.04
+      lowerBridgeContour.push(brainSurfaceFromVec([x, y, z]))
+    }
+
     // ── Category connection pairs (pre-computed) ──────────────────────────
     const connPairs: [number, number][] = []
     for (let i = 0; i < SKILLS.length; i++) {
@@ -205,6 +282,29 @@ export const SkillConstellation = component$(() => {
         ) {
           connPairs.push([i, j])
         }
+      }
+    }
+
+    // ── Local neural links (cross-category, short-range) ──────────────────
+    const neuralPairs: NeuralPair[] = []
+    const seen = new Set<string>()
+    for (let i = 0; i < SKILLS.length; i++) {
+      if (SKILLS[i].interest) continue
+      const nearest: { j: number; d: number }[] = []
+      for (let j = 0; j < SKILLS.length; j++) {
+        if (i === j || SKILLS[j].interest) continue
+        if (SKILLS[i].category === SKILLS[j].category) continue
+        nearest.push({ j, d: dist3(skillPts[i], skillPts[j]) })
+      }
+      nearest.sort((a, b) => a.d - b.d)
+      for (const one of nearest.slice(0, 2)) {
+        if (one.d > 0.92) continue
+        const a = Math.min(i, one.j)
+        const b = Math.max(i, one.j)
+        const key = `${a}:${b}`
+        if (seen.has(key)) continue
+        seen.add(key)
+        neuralPairs.push({ a, b, phase: Math.random() * TWO_PI })
       }
     }
 
@@ -232,6 +332,78 @@ export const SkillConstellation = component$(() => {
 
       const isDark = document.documentElement.classList.contains('dark')
       const baseRgb = isDark ? '200,165,150' : '130,90,80'
+      const t = performance.now() * 0.001
+
+      // ── Bilateral lobe glow (brain silhouette cue) ─────────────────────
+      {
+        const lobeA = ctx.createRadialGradient(
+          cx - R * 0.37,
+          cy - R * 0.05,
+          0,
+          cx - R * 0.37,
+          cy - R * 0.05,
+          R * 0.82,
+        )
+        lobeA.addColorStop(0, isDark ? 'rgba(40,70,68,0.26)' : 'rgba(150,220,210,0.22)')
+        lobeA.addColorStop(1, 'rgba(0,0,0,0)')
+        ctx.beginPath()
+        ctx.ellipse(cx - R * 0.37, cy - R * 0.05, R * 0.72, R * 0.62, -0.18, 0, TWO_PI)
+        ctx.fillStyle = lobeA
+        ctx.fill()
+
+        const lobeB = ctx.createRadialGradient(
+          cx + R * 0.37,
+          cy - R * 0.05,
+          0,
+          cx + R * 0.37,
+          cy - R * 0.05,
+          R * 0.82,
+        )
+        lobeB.addColorStop(0, isDark ? 'rgba(72,58,95,0.24)' : 'rgba(190,175,245,0.20)')
+        lobeB.addColorStop(1, 'rgba(0,0,0,0)')
+        ctx.beginPath()
+        ctx.ellipse(cx + R * 0.37, cy - R * 0.05, R * 0.72, R * 0.62, 0.18, 0, TWO_PI)
+        ctx.fillStyle = lobeB
+        ctx.fill()
+      }
+
+      // ── Subtle brain contour guide ──────────────────────────────────────
+      {
+        const contourAlpha = isDark ? 0.22 : 0.20
+        const zVisible = -0.08
+        const drawProjectedContour = (pts: V3[], closePath: boolean) => {
+          ctx.beginPath()
+          let started = false
+          for (const p of pts) {
+            const pr = project(p, R, cx, cy)
+            if (pr.z < zVisible) {
+              started = false
+              continue
+            }
+            if (!started) {
+              ctx.moveTo(pr.x, pr.y)
+              started = true
+            } else {
+              ctx.lineTo(pr.x, pr.y)
+            }
+          }
+          if (closePath && started) ctx.closePath()
+          ctx.stroke()
+        }
+
+        ctx.save()
+        ctx.strokeStyle = isDark
+          ? `rgba(188,170,160,${contourAlpha})`
+          : `rgba(96,76,68,${contourAlpha})`
+        ctx.lineWidth = 1.25 * dpr
+        ctx.lineCap = 'round'
+        ctx.lineJoin = 'round'
+        drawProjectedContour(leftLobeContour, true)
+        drawProjectedContour(rightLobeContour, true)
+        drawProjectedContour(lowerBridgeContour, false)
+
+        ctx.restore()
+      }
 
       // ── Sphere background glow ─────────────────────────────────────────
       const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 1.05)
@@ -304,6 +476,43 @@ export const SkillConstellation = component$(() => {
         ctx.strokeStyle = `rgba(${r},${g},${bl2},${alpha})`
         ctx.lineWidth = 0.9
         ctx.stroke()
+      }
+
+      // ── Synapse-like curved links + traveling signal ───────────────────
+      for (const pair of neuralPairs) {
+        const a = sp[pair.a]
+        const b = sp[pair.b]
+        const avgZ = (a.z + b.z) / 2
+        if (avgZ < -0.35) continue
+
+        const mx = (a.x + b.x) / 2
+        const my = (a.y + b.y) / 2
+        const vx = b.x - a.x
+        const vy = b.y - a.y
+        const len = Math.hypot(vx, vy) || 1
+        const nx = -vy / len
+        const ny = vx / len
+        const bend = 8 * dpr + (1 - Math.max(0, avgZ)) * 5 * dpr
+        const cx2 = mx + nx * bend
+        const cy2 = my + ny * bend
+
+        const baseAlpha = (0.08 + Math.max(0, avgZ) * 0.22) * (isDark ? 1.0 : 0.9)
+        ctx.beginPath()
+        ctx.moveTo(a.x, a.y)
+        ctx.quadraticCurveTo(cx2, cy2, b.x, b.y)
+        ctx.strokeStyle = isDark ? `rgba(160,180,200,${baseAlpha})` : `rgba(80,100,120,${baseAlpha})`
+        ctx.lineWidth = 0.8 * dpr
+        ctx.stroke()
+
+        const prog = ((t * 0.42 + pair.phase) % TWO_PI) / TWO_PI
+        const ip = 1 - prog
+        const px = ip * ip * a.x + 2 * ip * prog * cx2 + prog * prog * b.x
+        const py = ip * ip * a.y + 2 * ip * prog * cy2 + prog * prog * b.y
+        const pulseR = (1.35 + Math.max(0, avgZ) * 1.1) * dpr
+        ctx.beginPath()
+        ctx.arc(px, py, pulseR, 0, TWO_PI)
+        ctx.fillStyle = isDark ? 'rgba(170,220,255,0.55)' : 'rgba(40,120,170,0.45)'
+        ctx.fill()
       }
 
       // ── Skill nodes (sorted back → front) ────────────────────────────
@@ -719,8 +928,8 @@ export const SkillConstellation = component$(() => {
 
       {/* 3D Canvas */}
       <div
-        class="w-full rounded-2xl overflow-hidden"
-        style="background:var(--bg-surface);border:1px solid var(--border)"
+        class="w-full rounded-[2rem] overflow-hidden"
+        style="background:radial-gradient(120% 110% at 30% 10%, color-mix(in srgb, var(--bg-card) 90%, #2dd4bf 10%) 0%, var(--bg-surface) 56%, color-mix(in srgb, var(--bg-surface) 88%, #0f172a 12%) 100%);border:1px solid color-mix(in srgb, var(--border) 78%, #2dd4bf 22%)"
       >
         <canvas
           ref={canvasRef}

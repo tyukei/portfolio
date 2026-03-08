@@ -19,7 +19,7 @@ const EventCard = component$<{ event: ConnpassEvent; last: boolean }>((props) =>
       class="block group"
     >
       <div
-        class="py-4 px-3 -mx-3 rounded-lg transition-colors duration-200 group-hover:bg-[var(--bg-surface)]"
+        class="py-4 px-3 -mx-3 rounded-lg min-h-[92px] transition-colors duration-200 group-hover:bg-[var(--bg-surface)]"
         style={props.last ? '' : 'border-bottom:1px solid var(--border)'}
       >
         <div class="flex items-start justify-between gap-3">
@@ -57,17 +57,10 @@ export const Events = component$<{ events: ConnpassEvent[] }>((props) => {
   return (
     <div>
       <div class="flex items-center justify-between mb-4">
-        {/* Serif heading with vertical writing accent */}
-        <div class="flex items-start gap-2">
+        <div>
           <h2 class="font-serif-jp text-2xl font-bold" style="color:var(--text-1)">
             Events
           </h2>
-          <span
-            class="text-[9px] tracking-widest mt-1 select-none"
-            style="writing-mode:vertical-rl;text-orientation:mixed;color:var(--text-2);opacity:0.4;letter-spacing:0.2em"
-          >
-            イベント
-          </span>
         </div>
         <a
           href="https://connpass.com/user/tyukei/"

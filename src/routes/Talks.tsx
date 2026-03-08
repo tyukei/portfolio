@@ -19,7 +19,7 @@ const TalkCard = component$<{ talk: Talk; last: boolean }>((props) => {
       class="block group"
     >
       <div
-        class="py-4 px-3 -mx-3 rounded-lg flex gap-3 items-start transition-colors duration-200 group-hover:bg-[var(--bg-surface)]"
+        class="py-4 px-3 -mx-3 rounded-lg min-h-[92px] flex gap-3 items-start transition-colors duration-200 group-hover:bg-[var(--bg-surface)]"
         style={props.last ? '' : 'border-bottom:1px solid var(--border)'}
       >
         {/* Thumbnail with zoom on hover */}
@@ -78,17 +78,10 @@ export const Talks = component$<{ talks: Talk[] }>((props) => {
   return (
     <div>
       <div class="flex items-center justify-between mb-4">
-        {/* Serif heading with vertical writing accent */}
-        <div class="flex items-start gap-2">
+        <div>
           <h2 class="font-serif-jp text-2xl font-bold" style="color:var(--text-1)">
             Talks
           </h2>
-          <span
-            class="text-[9px] tracking-widest mt-1 select-none"
-            style="writing-mode:vertical-rl;text-orientation:mixed;color:var(--text-2);opacity:0.4;letter-spacing:0.2em"
-          >
-            登壇
-          </span>
         </div>
         <a
           href="https://speakerdeck.com/tyukei"
