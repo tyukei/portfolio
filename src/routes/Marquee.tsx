@@ -3,12 +3,12 @@ import { component$ } from '@builder.io/qwik'
 // The text that scrolls across the banner
 // Duplicated in the DOM so the -50% translate creates a seamless loop
 const ITEMS = [
-  'Be. Higashi Free LLM',
-  'Data Engineering & Agent Crafting',
-  'Okinawa, Japan',
-  'Be. Higashi Free LLM',
-  'Data Engineering & Agent Crafting',
-  'Okinawa, Japan',
+  'Signal Archive // TYUKEI',
+  'Data Engineering · Agent Systems',
+  'Sector: Okinawa, JP',
+  'Identity Unverified',
+  'Signal Archive // TYUKEI',
+  'Identity Unverified',
 ]
 
 const SEP = '·'

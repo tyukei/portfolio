@@ -54,7 +54,6 @@ const AVATAR_FILTERS = [
 ]
 
 const AVATAR_LABELS = ['Normal', 'Warm', 'Cool', 'Vivid']
-
 export const ProfileCard = component$(() => {
   const revealed = useSignal(false)
   const avatarState = useSignal(0)
@@ -120,7 +119,7 @@ export const ProfileCard = component$(() => {
                 class="text-xs tracking-widest uppercase transition-transform"
                 style={`color:var(--text-2);letter-spacing:0.16em;transition-duration:800ms;transition-delay:180ms;transition-timing-function:cubic-bezier(0.16,1,0.3,1);transform:translateY(${revealed.value ? '0' : '110%'})`}
               >
-                @tyukei · Data Engineer · 沖縄
+                @TYUKEI · CHUKEI
               </p>
             </div>
 
@@ -129,7 +128,7 @@ export const ProfileCard = component$(() => {
               class="text-sm mt-3 transition-opacity"
               style={`color:var(--text-2);transition-duration:600ms;transition-delay:320ms;opacity:${revealed.value ? '1' : '0'}`}
             >
-              沖縄のしがないデータエンジニアでござる
+              人と人を継なぐ変人
             </p>
 
             {/* Social links */}

@@ -28,19 +28,13 @@ export const About = component$(() => {
       />
       <div class="pl-5 md:pl-6">
         {/* Heading with vertical writing decoration */}
-        <div class="flex items-start gap-3 mb-4">
+        <div class="mb-4">
           <h2
             class="font-serif-jp text-[2.25rem] leading-none font-bold"
             style="color:var(--text-1)"
           >
             About
           </h2>
-          <span
-            class="text-[9px] tracking-widest mt-1 select-none"
-            style="writing-mode:vertical-rl;text-orientation:mixed;color:var(--text-2);opacity:0.4;letter-spacing:0.22em"
-          >
-            アバウト
-          </span>
         </div>
 
         <ul class="flex flex-col">

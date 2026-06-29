@@ -1,7 +1,6 @@
 import { component$ } from '@builder.io/qwik'
 import type { ContributionData } from '~/lib/contributions'
 import { ContributionGraph, ContributionLegend } from './ContributionGraph'
-import { StreakBadge } from './StreakBadge'
 
 const CURRENT_YEAR = new Date().getFullYear()
 const YEARS = Array.from(
@@ -58,8 +57,7 @@ export const ContributionSection = component$<{
               <ContributionGraph data={data} loading={false} year={y} />
             </div>
 
-            <div class="flex flex-wrap items-center justify-between gap-3">
-              <StreakBadge data={data} />
+            <div class="flex flex-wrap items-center justify-end gap-3">
               <ContributionLegend />
             </div>
           </div>

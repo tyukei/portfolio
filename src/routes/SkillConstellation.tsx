@@ -911,36 +911,43 @@ export const SkillConstellation = component$(() => {
   return (
     <div>
       {/* Section heading */}
-      <div class="flex items-start gap-3 mb-2">
+      <div class="mb-5">
         <h2 class="font-serif-jp text-2xl font-bold" style="color:var(--text-1)">
           Skills
         </h2>
-        <span
-          class="text-[9px] tracking-widest mt-1 select-none"
-          style="writing-mode:vertical-rl;text-orientation:mixed;color:var(--text-2);opacity:0.4;letter-spacing:0.2em"
-        >
-          スキル
-        </span>
       </div>
-      <p class="text-xs mb-5" style="color:var(--text-2)">
-        ドラッグで脳を回転 · ホバーで詳細
-      </p>
 
       {/* 3D Canvas */}
       <div
-        class="w-full rounded-[2rem] overflow-hidden"
-        style="background:radial-gradient(120% 110% at 30% 10%, color-mix(in srgb, var(--bg-card) 90%, #2dd4bf 10%) 0%, var(--bg-surface) 56%, color-mix(in srgb, var(--bg-surface) 88%, #0f172a 12%) 100%);border:1px solid color-mix(in srgb, var(--border) 78%, #2dd4bf 22%)"
+        class="relative w-full rounded-[2.25rem] overflow-hidden"
+        style="background:radial-gradient(140% 120% at 18% 10%, color-mix(in srgb, var(--bg-card) 86%, #2dd4bf 14%) 0%, color-mix(in srgb, var(--bg-surface) 90%, #0f172a 10%) 52%, var(--bg-base) 100%);box-shadow:inset 0 40px 110px rgba(32,178,170,0.08), inset 0 -30px 100px rgba(20,20,30,0.20), 0 28px 70px rgba(0,0,0,0.22)"
       >
+        <div
+          class="absolute -left-8 -top-10 w-52 h-52 rounded-full pointer-events-none"
+          style="background:radial-gradient(circle, rgba(34,211,238,0.22) 0%, rgba(34,211,238,0.06) 38%, rgba(34,211,238,0) 72%)"
+        />
+        <div
+          class="absolute -right-10 -bottom-10 w-60 h-60 rounded-full pointer-events-none"
+          style="background:radial-gradient(circle, rgba(167,139,250,0.16) 0%, rgba(167,139,250,0.04) 42%, rgba(167,139,250,0) 74%)"
+        />
+        <div
+          class="absolute inset-0 pointer-events-none"
+          style="background:linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.00) 22%, rgba(0,0,0,0.00) 76%, rgba(0,0,0,0.18) 100%)"
+        />
         <canvas
           ref={canvasRef}
-          class="block w-full cursor-grab active:cursor-grabbing touch-none"
+          class="relative z-10 block w-full cursor-grab active:cursor-grabbing touch-none"
         />
       </div>
 
       {/* Legend */}
       <div class="flex flex-wrap gap-x-5 gap-y-2 mt-5">
         {LEGEND.map(({ label, color }) => (
-          <div key={label} class="flex items-center gap-1.5">
+          <div
+            key={label}
+            class="flex items-center gap-1.5 rounded-full px-2.5 py-1"
+            style="background:color-mix(in srgb, var(--bg-surface) 76%, transparent)"
+          >
             <div
               class="w-2 h-2 rounded-full flex-shrink-0"
               style={`background:${color}`}

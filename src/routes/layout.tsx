@@ -35,19 +35,19 @@ export default component$(() => {
       >
         <Link
           href="/"
-          class="text-xs font-bold tracking-widest uppercase"
+          class="font-mono-signal text-xs font-bold tracking-widest uppercase"
           style="color:var(--text-1);letter-spacing:0.18em"
         >
-          tyukei
+          tyukei // archive
         </Link>
 
         <div class="flex items-center gap-6">
           <Link
             href="/now"
-            class="text-xs tracking-widest uppercase transition-opacity hover:opacity-40"
+            class="font-mono-signal text-xs tracking-widest uppercase transition-opacity hover:opacity-40"
             style="color:var(--text-2);letter-spacing:0.14em"
           >
-            /now
+            /now.log
           </Link>
 
           <button
@@ -81,10 +81,10 @@ export default component$(() => {
 
       {/* Footer */}
       <footer
-        class="text-center py-12 text-xs tracking-widest uppercase"
+        class="font-mono-signal text-center py-12 text-xs tracking-widest uppercase"
         style="color:var(--text-2);border-top:1px solid var(--border);letter-spacing:0.16em"
       >
-        © 2024 Keita Nakata · Built with{' '}
+        transmission active · built with{' '}
         <a
           href="https://qwik.dev"
           target="_blank"
