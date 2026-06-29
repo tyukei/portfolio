@@ -6,7 +6,10 @@ on:
       - main
   workflow_dispatch:
   schedule:
-    - cron: '0 9 * * *'
+    # 月1更新。GitHub の schedule は「毎時0分」が最も混雑しドロップされやすいため
+    # 分をずらし、毎月1日に朝・夜の2回走らせて片方がドロップされても同日中に拾えるようにする。
+    - cron: '37 21 1 * *'  # 毎月1日 21:37 UTC = 06:37 JST
+    - cron: '19 9 1 * *'   # 毎月1日 09:19 UTC = 18:19 JST
 
 permissions:
   contents: read
@@ -23,10 +26,10 @@ jobs:
     environment: github-pages
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 20
 
