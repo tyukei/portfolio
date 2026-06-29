@@ -25,8 +25,9 @@ if (!GEMINI_API_KEY) {
   process.exit(1)
 }
 
-// Change to gemini-2.0-flash if you need a more capable model
-const GEMINI_MODEL = 'gemini-2.0-flash-lite'
+// Change to a more capable model (e.g. gemini-3.1-flash) if needed.
+// gemini-2.0-flash-lite の無料枠が limit:0 になったため 3.1 系へ移行。
+const GEMINI_MODEL = 'gemini-3.1-flash-lite'
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN || process.env.PORTFOLIO_TOKEN_TYUKEI
 const GITHUB_USER = 'tyukei'
 const ZENN_USER = 'kei_ninja'
