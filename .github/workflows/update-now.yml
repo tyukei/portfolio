@@ -1,9 +1,9 @@
 name: Update /now page (Gemini)
 
 on:
-  # 毎週月曜 09:00 JST (= Sunday 00:00 UTC)
+  # 毎月1日 09:00 JST (= 1日 00:00 UTC)
   schedule:
-    - cron: '0 0 * * 1'
+    - cron: '0 0 1 * *'
   # 手動実行も可能
   workflow_dispatch:
 
