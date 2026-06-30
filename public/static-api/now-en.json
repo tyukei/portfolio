@@ -1,0 +1,65 @@
+{
+  "updatedAt": "2026-06-30",
+  "sections": [
+    {
+      "title": "What I'm working on now",
+      "items": [
+        {
+          "emoji": "🤖",
+          "label": "Integrating LLM Agents with MCP",
+          "detail": "I'm currently diving deep into agent autonomy using the Model Context Protocol while updating my LLM-related repositories on GitHub. My primary focus is building data analysis agents that seamlessly integrate with BigQuery."
+        },
+        {
+          "emoji": "💻",
+          "label": "Refactoring my portfolio site",
+          "detail": "I'm continuously refining my portfolio repository to better showcase my current tech stack. I'm experimenting with optimizing deployment flows using Cloud Run and migrating to a more modern frontend architecture."
+        }
+      ]
+    },
+    {
+      "title": "What I'm reading",
+      "items": [
+        {
+          "emoji": "📖",
+          "label": "Research papers on AI agent design patterns",
+          "detail": "Following my recent article on 'agents that build agents,' I'm exploring the latest behaviors of reasoning models. This research is providing great insights into implementing complex workflows more efficiently."
+        },
+        {
+          "emoji": "☕",
+          "label": "Literature on coffee roasting and data analysis",
+          "detail": "I'm applying a data-driven approach to my home roasting hobby by tracking the correlation between temperature curves and flavor profiles. By incorporating an engineering perspective, I'm working on achieving highly reproducible extractions."
+        }
+      ]
+    },
+    {
+      "title": "What I'm into lately",
+      "items": [
+        {
+          "emoji": "🏄",
+          "label": "SUP (Stand Up Paddleboarding) in Okinawa",
+          "detail": "I've been heading out to the ocean in Okinawa on weekends to clear my mind and switch off from work. Feeling the wind on the water is the perfect way to recharge and sharpen my focus for coding."
+        },
+        {
+          "emoji": "🛠️",
+          "label": "Operating and improving my DIY refrigerator",
+          "detail": "I'm continuing my project on building a custom refrigerator and working on stabilizing its temperature control. Controlling hardware and software across these boundaries provides a refreshing contrast to my day-to-day data engineering."
+        }
+      ]
+    },
+    {
+      "title": "Recent events & meetups",
+      "items": [
+        {
+          "emoji": "🎤",
+          "label": "Engaging with online tech communities",
+          "detail": "While I haven't attended any offline events recently, I've been maintaining a steady stream of technical output through GitHub contributions and Zenn articles. I'm looking forward to applying insights from RevOps reading circles to future community discussions."
+        },
+        {
+          "emoji": "🔍",
+          "label": "Data engineering meetups",
+          "detail": "I've been joining online meetups to keep up with the latest trends in dbt and BigQuery. Sharing practical challenges and learning from other engineers' solutions has been invaluable."
+        }
+      ]
+    }
+  ]
+}

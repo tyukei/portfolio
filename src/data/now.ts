@@ -87,3 +87,81 @@ export const NOW_DATA: NowSection[] = [
     ],
   },
 ]
+
+// English fallback — mirrors NOW_DATA. Used when now-en.json hasn't been generated yet.
+export const NOW_DATA_EN: NowSection[] = [
+  {
+    title: "What I'm working on now",
+    items: [
+      {
+        emoji: '🤖',
+        label: 'Building LLM Agents',
+        detail:
+          'Building data-engineering automation tools on top of MCP (Model Context Protocol). Currently working on an agent that auto-suggests query optimizations through BigQuery integration.',
+      },
+      {
+        emoji: '📊',
+        label: 'Rebuilding data pipelines',
+        detail:
+          'Migrating in-house batch jobs to Cloud Run Jobs + BigQuery. Setting up a dbt transformation layer and automating data-quality checks.',
+      },
+      {
+        emoji: '🌐',
+        label: 'Portfolio renewal',
+        detail:
+          'Building an activity-first portfolio with Qwik + UnoCSS. The contribution graph sits in the first view to convey "what I have done" at a glance.',
+      },
+    ],
+  },
+  {
+    title: "What I'm reading",
+    items: [
+      {
+        emoji: '📖',
+        label: 'Designing Data-Intensive Applications',
+        detail:
+          "Martin Kleppmann's classic. Re-reading the chapters on distributed systems and data consistency in particular.",
+      },
+      {
+        emoji: '📰',
+        label: 'Google Cloud Blog',
+        detail:
+          'Keeping up with new BigQuery and Vertex AI features. Especially curious about where BigQuery ML is heading.',
+      },
+    ],
+  },
+  {
+    title: "What I'm into lately",
+    items: [
+      {
+        emoji: '🏄',
+        label: 'SUP (stand-up paddleboarding)',
+        detail:
+          'Enjoying SUP on the Okinawa sea on weekends. The crystal-clear water around the Kerama Islands is the best.',
+      },
+      {
+        emoji: '☕',
+        label: 'Home coffee roasting',
+        detail:
+          'Started doing everything myself from hand-picking to roasting. Ethiopian natural-process beans are my current favorite.',
+      },
+    ],
+  },
+  {
+    title: 'Recent events & meetups',
+    items: [
+      {
+        emoji: '🎤',
+        label: 'Okinawa.rb',
+        detail:
+          'Gave a talk on LLM × Ruby at the Okinawa Ruby community. The response was bigger than expected, which made me happy.',
+      },
+      {
+        emoji: '💻',
+        label: 'DevelopersIO',
+        detail:
+          "Prepping a GCP cost-optimization topic, drawing on Classmethod's tech blog.",
+      },
+    ],
+  },
+]
