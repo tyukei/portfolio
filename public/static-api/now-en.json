@@ -6,13 +6,13 @@
       "items": [
         {
           "emoji": "🤖",
-          "label": "Integrating LLM Agents with MCP",
-          "detail": "I'm currently diving deep into agent autonomy using the Model Context Protocol while updating my LLM-related repositories on GitHub. My primary focus is building data analysis agents that seamlessly integrate with BigQuery."
+          "label": "LLM Agent and MCP development",
+          "detail": "I'm expanding on the 'agent that builds agents' concept from my recent Zenn article by leveraging the Model Context Protocol (MCP) to build autonomous data analysis flows. Using Python and GCP, I'm currently iterating on automating data engineering tasks in more practical ways."
         },
         {
-          "emoji": "💻",
-          "label": "Refactoring my portfolio site",
-          "detail": "I'm continuously refining my portfolio repository to better showcase my current tech stack. I'm experimenting with optimizing deployment flows using Cloud Run and migrating to a more modern frontend architecture."
+          "emoji": "🏗️",
+          "label": "Revamping my portfolio site",
+          "detail": "As seen in my recent GitHub activity, I'm rebuilding my portfolio site using a modern tech stack. I'm focusing on optimizing the deployment flow with Cloud Run and streamlining how I showcase my technical contributions."
         }
       ]
     },
@@ -21,13 +21,13 @@
       "items": [
         {
           "emoji": "📖",
-          "label": "Research papers on AI agent design patterns",
-          "detail": "Following my recent article on 'agents that build agents,' I'm exploring the latest behaviors of reasoning models. This research is providing great insights into implementing complex workflows more efficiently."
+          "label": "Latest Data Engineering papers and docs",
+          "detail": "With AI adoption accelerating in RevOps, I'm investigating new design patterns for ensuring data pipeline reliability. I'm deep-diving into technical articles covering the evolution of dbt and optimization techniques for large-scale BigQuery processing."
         },
         {
           "emoji": "☕",
-          "label": "Literature on coffee roasting and data analysis",
-          "detail": "I'm applying a data-driven approach to my home roasting hobby by tracking the correlation between temperature curves and flavor profiles. By incorporating an engineering perspective, I'm working on achieving highly reproducible extractions."
+          "label": "Technical literature on coffee roasting",
+          "detail": "To take a more scientific approach to my home roasting hobby, I'm reading up on the correlation between bean varieties and roasting profiles. I'm exploring whether I can apply my data analysis skills to craft the perfect cup of coffee."
         }
       ]
     },
@@ -36,13 +36,13 @@
       "items": [
         {
           "emoji": "🏄",
-          "label": "SUP (Stand Up Paddleboarding) in Okinawa",
-          "detail": "I've been heading out to the ocean in Okinawa on weekends to clear my mind and switch off from work. Feeling the wind on the water is the perfect way to recharge and sharpen my focus for coding."
+          "label": "Morning SUP in Okinawa",
+          "detail": "I've been enjoying SUP on the calm morning waters here in Okinawa. The time spent paddling while listening to the waves serves as the ultimate meditation to sharpen my focus for coding."
         },
         {
-          "emoji": "🛠️",
-          "label": "Operating and improving my DIY refrigerator",
-          "detail": "I'm continuing my project on building a custom refrigerator and working on stabilizing its temperature control. Controlling hardware and software across these boundaries provides a refreshing contrast to my day-to-day data engineering."
+          "emoji": "🧊",
+          "label": "Operating and improving my DIY fridge",
+          "detail": "Following my Zenn post on building a fridge, I'm currently fine-tuning sensors to improve temperature control precision. I'm fully immersed in this DIY project that blends hardware and software."
         }
       ]
     },
@@ -51,13 +51,13 @@
       "items": [
         {
           "emoji": "🎤",
-          "label": "Engaging with online tech communities",
-          "detail": "While I haven't attended any offline events recently, I've been maintaining a steady stream of technical output through GitHub contributions and Zenn articles. I'm looking forward to applying insights from RevOps reading circles to future community discussions."
+          "label": "Technical sharing in online communities",
+          "detail": "Recently, I've prioritized small, deep-dive discussion groups like the RevOps reading circle over large Connpass events. Exchanging views with other engineers on the real-world challenges of AI implementation has been highly stimulating."
         },
         {
-          "emoji": "🔍",
-          "label": "Data engineering meetups",
-          "detail": "I've been joining online meetups to keep up with the latest trends in dbt and BigQuery. Sharing practical challenges and learning from other engineers' solutions has been invaluable."
+          "emoji": "💡",
+          "label": "Asynchronous engagement in tech communities",
+          "detail": "Even when I can't attend events in person, I value asynchronous technical exchanges via GitHub and Zenn. Receiving feedback on my posts helps me deepen my understanding of emerging technology trends."
         }
       ]
     }
