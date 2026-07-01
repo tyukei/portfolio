@@ -2,18 +2,18 @@ import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { component$ } from '@builder.io/qwik'
 import { Link, type DocumentHead, routeLoader$ } from '@builder.io/qwik-city'
-import { NOW_DATA, NOW_UPDATED, type NowSection } from '~/data/now'
+import { NOW_DATA_EN, NOW_UPDATED, type NowSection } from '~/data/now'
 
 interface NowJson {
   updatedAt: string
   sections: NowSection[]
 }
 
-// Loads public/static-api/now.json at build time (SSG).
-// Falls back to src/data/now.ts when the JSON hasn't been generated yet.
-export const useNowData = routeLoader$(async (): Promise<NowJson> => {
+// Loads public/static-api/now-en.json at build time (SSG).
+// Falls back to src/data/now.ts (NOW_DATA_EN) when the JSON hasn't been generated yet.
+export const useNowDataEn = routeLoader$(async (): Promise<NowJson> => {
   try {
-    const path = join(process.cwd(), 'public', 'static-api', 'now.json')
+    const path = join(process.cwd(), 'public', 'static-api', 'now-en.json')
     const raw = await readFile(path, 'utf-8')
     const data = JSON.parse(raw) as NowJson
     if (Array.isArray(data.sections) && data.sections.length > 0) {
@@ -22,11 +22,11 @@ export const useNowData = routeLoader$(async (): Promise<NowJson> => {
   } catch {
     // File not yet generated — fall through to static fallback
   }
-  return { updatedAt: NOW_UPDATED, sections: NOW_DATA }
+  return { updatedAt: NOW_UPDATED, sections: NOW_DATA_EN }
 })
 
 export default component$(() => {
-  const now = useNowData()
+  const now = useNowDataEn()
   const { updatedAt, sections } = now.value
 
   return (
@@ -40,7 +40,7 @@ export default component$(() => {
           /now
         </h1>
         <p class="text-sm" style="color:var(--text-2)">
-          今この瞬間に何をしているか。最終更新:{' '}
+          What I'm doing right now. Last updated:{' '}
           <time dateTime={updatedAt}>{updatedAt}</time>
         </p>
         <div class="flex items-center gap-4 mt-3 text-xs" style="color:var(--text-2)">
@@ -50,21 +50,21 @@ export default component$(() => {
             rel="noopener noreferrer"
             class="flex items-center gap-1 transition-opacity hover:opacity-40"
           >
-            /now ページとは？
+            What is a /now page?
             <div class="i-tabler:arrow-up-right w-3 h-3" />
           </a>
           <span style="opacity:0.3">·</span>
           <span class="flex items-center gap-1" style="opacity:0.5">
             <div class="i-tabler:refresh w-3 h-3" />
-            毎週月曜更新
+            Updated every Monday
           </span>
           <span style="opacity:0.3">·</span>
           <Link
-            href="/now/en"
+            href="/now"
             class="flex items-center gap-1 transition-opacity hover:opacity-40"
           >
             <div class="i-tabler:language w-3 h-3" />
-            English
+            日本語
           </Link>
         </div>
       </div>
@@ -113,7 +113,7 @@ export default component$(() => {
           style="color:var(--text-2)"
         >
           <div class="i-tabler:arrow-left w-4 h-4" />
-          トップに戻る
+          Back to top
         </Link>
       </div>
     </div>
@@ -121,12 +121,12 @@ export default component$(() => {
 })
 
 export const head: DocumentHead = {
-  title: '/now — Keita Nakata',
+  title: '/now (EN) — Keita Nakata',
   meta: [
     {
       name: 'description',
       content:
-        'Keita Nakata が今取り組んでいること、読んでいるもの、最近ハマっていることを紹介するページ。毎週 Gemini が自動更新。',
+        "What Keita Nakata is working on, reading, and into right now. Auto-updated weekly by Gemini.",
     },
   ],
 }

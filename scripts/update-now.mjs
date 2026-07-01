@@ -35,6 +35,7 @@ const CONNPASS_USER = 'tyukei'
 
 const ROOT = process.cwd()
 const OUTPUT_PATH = join(ROOT, 'public', 'static-api', 'now.json')
+const OUTPUT_EN_PATH = join(ROOT, 'public', 'static-api', 'now-en.json')
 
 // ─── Fetch helpers ─────────────────────────────────────────────────────────────
 
@@ -206,6 +207,10 @@ ${today}
 「今この人物が実際に取り組んでいること・読んでいること・ハマっていること」を
 自然に反映した /now ページを生成してください。
 
+**日本語版（sections）と英語版（sectionsEn）の両方**を生成すること。
+英語版は日本語版の内容を1対1で対応させた自然な英訳にすること（同じ emoji・同じアイテム数・同じ順序）。
+英語版は機械翻訳調ではなく、ネイティブなエンジニアが書いたような自然な英語にすること。
+
 **出力形式:** 以下のJSON のみを出力してください（マークダウンのコードブロック・説明文は不要）。
 
 {
@@ -235,10 +240,37 @@ ${today}
         { "emoji": "🎤", "label": "イベント名", "detail": "参加した感想や学び。" }
       ]
     }
+  ],
+  "sectionsEn": [
+    {
+      "title": "What I'm working on now",
+      "items": [
+        { "emoji": "🤖", "label": "Item name", "detail": "2-3 sentence detail. Include concrete tool/tech names." }
+      ]
+    },
+    {
+      "title": "What I'm reading",
+      "items": [
+        { "emoji": "📖", "label": "Book / article", "detail": "Why reading it and takeaways." }
+      ]
+    },
+    {
+      "title": "What I'm into lately",
+      "items": [
+        { "emoji": "🏄", "label": "Activity", "detail": "How I'm enjoying it." }
+      ]
+    },
+    {
+      "title": "Recent events & meetups",
+      "items": [
+        { "emoji": "🎤", "label": "Event name", "detail": "Impressions and learnings." }
+      ]
+    }
   ]
 }
 
-各セクションに 2〜3 アイテムを含めること。GitHubやZennのデータをできるだけ反映させること。`
+各セクションに 2〜3 アイテムを含めること。GitHubやZennのデータをできるだけ反映させること。
+sections と sectionsEn は同じ emoji・同じアイテム数・同じ順序で対応させること。`
 }
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
@@ -275,13 +307,27 @@ if (!Array.isArray(nowData.sections)) {
 }
 
 // Ensure updatedAt is set
-nowData.updatedAt = nowData.updatedAt ?? today
+const updatedAt = nowData.updatedAt ?? today
 
-console.log(`\nWriting to ${OUTPUT_PATH}`)
-console.log(`  Sections: ${nowData.sections.length}`)
-nowData.sections.forEach((s) => console.log(`    - ${s.title} (${s.items?.length ?? 0} items)`))
+const ja = { updatedAt, sections: nowData.sections }
+// 英語版が無い/不正でも JP の更新は止めない
+const enSections = Array.isArray(nowData.sectionsEn) ? nowData.sectionsEn : null
 
 await mkdir(join(ROOT, 'public', 'static-api'), { recursive: true })
-await writeFile(OUTPUT_PATH, JSON.stringify(nowData, null, 2), 'utf-8')
+
+console.log(`\nWriting to ${OUTPUT_PATH}`)
+console.log(`  Sections (ja): ${ja.sections.length}`)
+ja.sections.forEach((s) => console.log(`    - ${s.title} (${s.items?.length ?? 0} items)`))
+await writeFile(OUTPUT_PATH, JSON.stringify(ja, null, 2), 'utf-8')
+
+if (enSections) {
+  const en = { updatedAt, sections: enSections }
+  console.log(`\nWriting to ${OUTPUT_EN_PATH}`)
+  console.log(`  Sections (en): ${en.sections.length}`)
+  en.sections.forEach((s) => console.log(`    - ${s.title} (${s.items?.length ?? 0} items)`))
+  await writeFile(OUTPUT_EN_PATH, JSON.stringify(en, null, 2), 'utf-8')
+} else {
+  console.warn('\n⚠ sectionsEn missing — skipped now-en.json (English page keeps previous content)')
+}
 
 console.log('\n✓ now.json updated successfully')
